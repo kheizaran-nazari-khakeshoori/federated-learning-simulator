@@ -121,18 +121,101 @@ def main():
     for c in range(3):
         grid.columnconfigure(c, weight=1)
 
-    # Bottom: Log console
-    log_frame = tk.Frame(right_panel, bg="white", height=140)
+    # Bottom: Log console (enhanced)
+    log_frame = tk.Frame(right_panel, bg="white", height=160, relief=tk.SOLID, bd=1)
     log_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=(5, 10))
     log_frame.pack_propagate(False)
-    tk.Label(log_frame, text="Logs", bg="white", fg="#7f8c8d", font=("Arial", 9, "bold")).pack(anchor="w", padx=10, pady=(6, 2))
-    text_scroll = tk.Scrollbar(log_frame)
-    text_scroll.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 5), pady=5)
-    log_text = tk.Text(log_frame, height=6, bg="#2c3e50", fg="#ecf0f1", font=("Consolas", 9), relief=tk.FLAT, yscrollcommand=text_scroll.set, padx=8, pady=5)
-    log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10, 0), pady=5)
+
+    # Log header toolbar
+    log_header = tk.Frame(log_frame, bg="white")
+    log_header.pack(fill=tk.X, padx=10, pady=(6, 2))
+    tk.Label(log_header, text="Logs", bg="white", fg="#2c3e50", font=("Arial", 10, "bold")).pack(side=tk.LEFT)
+    tk.Label(log_header, text="● live", bg="white", fg="#27ae60", font=("Arial", 8)).pack(side=tk.LEFT, padx=(8, 0))
+
+    # Auto-scroll var
+    autoscroll_var = tk.BooleanVar(value=True)
+    tk.Checkbutton(log_header, text="Auto-scroll", variable=autoscroll_var, bg="white", fg="#7f8c8d", font=("Arial", 8), selectcolor="white", activebackground="white").pack(side=tk.RIGHT, padx=5)
+
+    def clear_logs():
+        log_text.config(state=tk.NORMAL)
+        log_text.delete("1.0", tk.END)
+        log_text.config(state=tk.DISABLED)
+
+    def save_logs():
+        content = log_text.get("1.0", tk.END)
+        try:
+            with open("federated_logs.txt", "w") as f:
+                f.write(content)
+            log("Logs saved to federated_logs.txt", "SUCCESS")
+        except Exception as e:
+            log(f"Save failed: {e}", "ERROR")
+
+    tk.Button(log_header, text="Save", command=save_logs, bg="#ecf0f1", fg="#2c3e50", font=("Arial", 8), relief=tk.FLAT, padx=8, pady=2).pack(side=tk.RIGHT, padx=2)
+    tk.Button(log_header, text="Clear", command=clear_logs, bg="#ecf0f1", fg="#2c3e50", font=("Arial", 8), relief=tk.FLAT, padx=8, pady=2).pack(side=tk.RIGHT, padx=2)
+
+    # Separator
+    tk.Frame(log_frame, bg="#ecf0f1", height=1).pack(fill=tk.X, padx=10, pady=2)
+
+    # Text area + scrollbar
+    log_body = tk.Frame(log_frame, bg="white")
+    log_body.pack(fill=tk.BOTH, expand=True, padx=5, pady=(2, 5))
+
+    text_scroll = tk.Scrollbar(log_body)
+    text_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+    log_text = tk.Text(log_body, height=6, bg="#1e2a33", fg="#ecf0f1", font=("Consolas", 9), relief=tk.FLAT,
+                       yscrollcommand=text_scroll.set, padx=8, pady=5, insertbackground="white", wrap=tk.WORD)
+    log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     text_scroll.config(command=log_text.yview)
-    log_text.insert(tk.END, "[INFO] Simulator ready. Configure left panel and press Start.\n")
-    log_text.config(state=tk.DISABLED)
+
+    # Tag colors for log levels
+    log_text.tag_config("INFO", foreground="#3498db")
+    log_text.tag_config("SUCCESS", foreground="#2ecc71")
+    log_text.tag_config("ROUND", foreground="#f1c40f")
+    log_text.tag_config("CLIENT", foreground="#e67e22")
+    log_text.tag_config("ERROR", foreground="#e74c3c")
+    log_text.tag_config("TIME", foreground="#95a5a6")
+
+    import datetime
+
+    def log(msg, level="INFO"):
+        """Append colored log line with timestamp."""
+        log_text.config(state=tk.NORMAL)
+        ts = datetime.datetime.now().strftime("%H:%M:%S")
+        log_text.insert(tk.END, f"[{ts}] ", "TIME")
+        log_text.insert(tk.END, f"[{level}] ", level)
+        log_text.insert(tk.END, f"{msg}\n")
+        log_text.config(state=tk.DISABLED)
+        if autoscroll_var.get():
+            log_text.see(tk.END)
+
+    # Initial logs
+    log("Simulator ready. Configure left panel and press Start.", "INFO")
+    log("Tip: Logs will show each round & client update here.", "INFO")
+
+    # Wire left panel buttons to logs (demo)
+    def on_start():
+        status_var.set("Training...")
+        status_lbl.config(bg="#3498db", fg="white")
+        log(f"Starting training: {clients_var.get()} clients, {rounds_var.get()} rounds, {dataset_var.get()}, {agg_var.get()}", "INFO")
+        # Demo: simulate 2 rounds of fake logs
+        for r in range(1, 3):
+            log(f"--- Round {r}/{rounds_var.get()} ---", "ROUND")
+            for c in range(int(clients_var.get())):
+                log(f"Client {c+1} training (epochs={epochs_var.get()})... acc=0.{80+r+c}%", "CLIENT")
+            log(f"Aggregated with {agg_var.get()} - global accuracy updated", "SUCCESS")
+        log("Demo finished. Wire your real FedAvg loop here.", "SUCCESS")
+        status_var.set("Idle")
+        status_lbl.config(bg="#f1c40f", fg="#2c3e50")
+        accuracy_var.set("84.30%")
+
+    def on_stop():
+        log("Training stopped by user.", "ERROR")
+        status_var.set("Stopped")
+        status_lbl.config(bg="#e74c3c", fg="white")
+
+    start_btn.config(command=on_start)
+    stop_btn.config(command=on_stop)
 
     root.mainloop()
 
