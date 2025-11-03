@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual env
+.venv/
+venv/
+env/
+ENV/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Data / Models / Logs - uncomment if you don't want to version large files
+# data/
+# datasets/
+# checkpoints/
+# *.pt
+# *.pth
+# *.h5
+# *.pkl
+# wandb/
+# runs/
+# logs/
+# results/
+
+# Testing / Coverage / Mypy / Ruff
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Opencode (optional - uncomment if needed)
+# .opencode/
