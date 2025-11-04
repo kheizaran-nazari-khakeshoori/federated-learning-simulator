@@ -168,8 +168,14 @@ def main():
             acc_lbl = tk.Label(card, textvariable=acc_v, bg="#f8f9fa", fg="#7f8c8d", font=("Arial", 9))
             acc_lbl.pack()
             st_lbl = tk.Label(card, textvariable=st_v, bg="#f8f9fa", fg="#95a5a6", font=("Arial", 8))
-            st_lbl.pack(pady=(2, 8))
-            client_widgets.append({"acc_var": acc_v, "status_var": st_v, "card": card, "acc_lbl": acc_lbl, "st_lbl": st_lbl})
+            st_lbl.pack(pady=(1, 3))
+            # progress bar for dummy loop visualization
+            bar_bg = tk.Frame(card, bg="#e0e0e0", height=6)
+            bar_bg.pack(fill=tk.X, padx=10, pady=(2, 8))
+            bar_bg.pack_propagate(False)
+            bar_fill = tk.Frame(bar_bg, bg="#27ae60")
+            bar_fill.place(relwidth=0, relheight=1)
+            client_widgets.append({"acc_var": acc_v, "status_var": st_v, "card": card, "acc_lbl": acc_lbl, "st_lbl": st_lbl, "bar": bar_fill, "bar_bg": bar_bg})
 
     rebuild_clients(5)
 
@@ -289,7 +295,7 @@ def main():
         log(f"Starting FedAvg: {n_clients} clients, {n_rounds} rounds, {n_epochs} epochs, {dataset}, {agg}", "INFO")
         log(f"Initial global accuracy: {sim_state['global_acc']:.2f}%", "INFO")
 
-        # Use after() to keep GUI responsive
+        # Dummy-loop style: animate each client sequentially, then aggregate + update chart/logs
         def run_round(r_idx):
             if not sim_state["running"]:
                 return
@@ -299,48 +305,58 @@ def main():
 
             round_var.set(f"Round: {r_idx} / {n_rounds}")
             log(f"--- Round {r_idx}/{n_rounds} ---", "ROUND")
-
-            # Simulate each client local training: global_acc + noise + epoch bonus
-            client_accs = []
-            for idx, cw in enumerate(client_widgets):
+            # reset bars
+            for cw in client_widgets:
+                cw["bar"].place(relwidth=0, relheight=1)
                 cw["status_var"].set("● training")
                 cw["st_lbl"].config(fg="#e67e22")
-                # FedAvg core: local accuracy based on global + client heterogeneity
+                cw["card"].config(bg="#fef9e7")
+
+            client_accs = []
+            # animate clients one-by-one (dummy loop visualization)
+            def animate_client(idx):
+                if not sim_state["running"]:
+                    return
+                if idx >= len(client_widgets):
+                    # all clients done -> aggregate (FedAvg)
+                    avg_acc = sum(client_accs) / len(client_accs) if client_accs else sim_state["global_acc"]
+                    momentum = 0.3 if agg == "FedAdam" else 0.15
+                    new_global = sim_state["global_acc"] * momentum + avg_acc * (1 - momentum)
+                    new_global += random.uniform(-0.4, 0.8)
+                    new_global = min(99.0, max(sim_state["global_acc"], new_global))
+                    sim_state["global_acc"] = new_global
+                    sim_state["history"].append(new_global)
+                    accuracy_var.set(f"{new_global:.2f}%")
+                    draw_chart(sim_state["history"], n_rounds)
+                    log(f"Aggregated ({agg}) -> global accuracy: {new_global:.2f}%", "SUCCESS")
+                    for cw in client_widgets:
+                        cw["card"].config(bg="#f8f9fa")
+                    root.after(600, lambda: run_round(r_idx+1))
+                    return
+
+                cw = client_widgets[idx]
                 base = sim_state["global_acc"]
-                heterogeneity = random.uniform(-6, 6)  # non-IID variance
+                heterogeneity = random.uniform(-6, 6)
                 epoch_gain = n_epochs * random.uniform(0.6, 1.1) * diff
-                # aggregation method modifier
                 if agg == "FedProx":
-                    epoch_gain *= 0.92  # regularization slows but stabilizes
+                    epoch_gain *= 0.92
                 elif agg == "FedAdam":
-                    epoch_gain *= 1.18  # adaptive faster
+                    epoch_gain *= 1.18
                 local_acc = base + heterogeneity + epoch_gain + random.uniform(-1.5, 1.5)
-                # diminishing returns as accuracy grows
                 local_acc = min(98.5, max(5, local_acc - (base/100)*2))
                 client_accs.append(local_acc)
+
+                # update card
                 cw["acc_var"].set(f"acc: {local_acc:.1f}%")
+                cw["bar"].place(relwidth=min(1, local_acc/100), relheight=1)
+                cw["bar"].config(bg="#27ae60" if local_acc > 70 else "#e67e22" if local_acc > 50 else "#e74c3c")
                 log(f"Client {idx+1} local update: {local_acc:.1f}% (epochs={n_epochs})", "CLIENT")
                 cw["status_var"].set("● done")
                 cw["st_lbl"].config(fg="#27ae60")
 
-            # FedAvg aggregation: weighted average (here equal weights)
-            # Simulate FedAvg formula: w_global = sum(n_k / n * w_k)
-            avg_acc = sum(client_accs) / len(client_accs) if client_accs else sim_state["global_acc"]
-            # Convergence: blend previous global with new avg
-            momentum = 0.3 if agg == "FedAdam" else 0.15
-            new_global = sim_state["global_acc"] * momentum + avg_acc * (1 - momentum)
-            # Add small random fluctuation
-            new_global += random.uniform(-0.4, 0.8)
-            new_global = min(99.0, max(sim_state["global_acc"], new_global))  # monotonic-ish with noise
-            sim_state["global_acc"] = new_global
-            sim_state["history"].append(new_global)
+                root.after(180, lambda: animate_client(idx+1))
 
-            accuracy_var.set(f"{new_global:.2f}%")
-            draw_chart(sim_state["history"], n_rounds)
-            log(f"Aggregated ({agg}) -> global accuracy: {new_global:.2f}%", "SUCCESS")
-
-            # schedule next round
-            root.after(700, lambda: run_round(r_idx+1))
+            animate_client(0)
 
         def finish():
             sim_state["running"] = False
