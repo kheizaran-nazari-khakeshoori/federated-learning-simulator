@@ -96,30 +96,82 @@ def main():
     tk.Label(server_inner, text="Global Accuracy:", bg="white", fg="#2c3e50", font=("Arial", 10)).pack(side=tk.LEFT)
     accuracy_var = tk.StringVar(value="0.00%")
     tk.Label(server_inner, textvariable=accuracy_var, bg="white", fg="#27ae60", font=("Arial", 12, "bold")).pack(side=tk.LEFT, padx=10)
-    tk.Label(server_inner, text="Round: 0 / 10", bg="white", fg="#95a5a6", font=("Arial", 10)).pack(side=tk.RIGHT)
-    # Canvas placeholder for chart
+    round_var = tk.StringVar(value="Round: 0 / 10")
+    tk.Label(server_inner, textvariable=round_var, bg="white", fg="#95a5a6", font=("Arial", 10)).pack(side=tk.RIGHT)
+    # Canvas for chart (real FedAvg plot)
     chart_canvas = tk.Canvas(viz_frame, bg="white", height=180, highlightthickness=0)
     chart_canvas.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
-    chart_canvas.create_text(370, 90, text="Accuracy Chart (Rounds vs Accuracy) - will plot here", fill="#bdc3c7", font=("Arial", 11, "italic"))
-    # Simple axes
-    chart_canvas.create_line(50, 150, 700, 150, fill="#bdc3c7")  # x-axis
-    chart_canvas.create_line(50, 20, 50, 150, fill="#bdc3c7")   # y-axis
 
-    # Clients grid
+    def draw_chart(history, total_rounds):
+        chart_canvas.delete("all")
+        w = chart_canvas.winfo_width() or 700
+        h = 180
+        pad_l, pad_r, pad_t, pad_b = 50, 20, 20, 30
+        plot_w = w - pad_l - pad_r
+        plot_h = h - pad_t - pad_b
+        # axes
+        chart_canvas.create_line(pad_l, h-pad_b, w-pad_r, h-pad_b, fill="#bdc3c7")
+        chart_canvas.create_line(pad_l, pad_t, pad_l, h-pad_b, fill="#bdc3c7")
+        # y labels 0-100%
+        for yv in [0, 50, 100]:
+            y = h - pad_b - (yv/100)*plot_h
+            chart_canvas.create_line(pad_l-4, y, pad_l, y, fill="#bdc3c7")
+            chart_canvas.create_text(pad_l-8, y, text=f"{yv}%", anchor="e", fill="#95a5a6", font=("Arial", 7))
+            chart_canvas.create_line(pad_l, y, w-pad_r, y, fill="#ecf0f1", dash=(2,2))
+        # x labels
+        if total_rounds > 0:
+            for i in [0, total_rounds//2, total_rounds]:
+                if total_rounds == 0: continue
+                x = pad_l + (i/total_rounds)*plot_w if total_rounds else pad_l
+                chart_canvas.create_text(x, h-pad_b+8, text=f"{i}", fill="#95a5a6", font=("Arial", 7))
+            chart_canvas.create_text(w/2, h-8, text="Rounds", fill="#95a5a6", font=("Arial", 7))
+        if not history:
+            chart_canvas.create_text(w/2, h/2, text="Accuracy Chart (Rounds vs Accuracy) - waiting for training", fill="#bdc3c7", font=("Arial", 11, "italic"))
+            return
+        # plot line
+        points = []
+        for idx, acc in enumerate(history):
+            x = pad_l + ((idx+1)/ max(1,total_rounds))*plot_w
+            y = h - pad_b - (acc/100)*plot_h
+            points.extend([x, y])
+        if len(points) >= 4:
+            chart_canvas.create_line(points, fill="#27ae60", width=2, smooth=True)
+        for idx, acc in enumerate(history):
+            x = pad_l + ((idx+1)/ max(1,total_rounds))*plot_w
+            y = h - pad_b - (acc/100)*plot_h
+            chart_canvas.create_oval(x-3, y-3, x+3, y+3, fill="#27ae60", outline="white")
+            if idx == len(history)-1:
+                chart_canvas.create_text(x, y-10, text=f"{acc:.1f}%", fill="#27ae60", font=("Arial", 7, "bold"))
+
+    # Clients grid (dynamic)
     clients_frame = tk.Frame(viz_frame, bg="white")
     clients_frame.pack(fill=tk.BOTH, expand=True)
     tk.Label(clients_frame, text="CLIENTS", bg="white", fg="#7f8c8d", font=("Arial", 9, "bold")).pack(anchor="w", padx=12, pady=(8, 5))
     grid = tk.Frame(clients_frame, bg="white")
     grid.pack(padx=10, pady=(0, 10), fill=tk.BOTH, expand=True)
-    # Create 5 placeholder client boxes
-    for i in range(5):
-        card = tk.Frame(grid, bg="#f8f9fa", relief=tk.SOLID, bd=1)
-        card.grid(row=i//3, column=i%3, padx=5, pady=5, sticky="nsew")
-        tk.Label(card, text=f"Client {i+1}", bg="#f8f9fa", fg="#2c3e50", font=("Arial", 10, "bold")).pack(pady=(8, 2))
-        tk.Label(card, text="acc: --", bg="#f8f9fa", fg="#7f8c8d", font=("Arial", 9)).pack()
-        tk.Label(card, text="● idle", bg="#f8f9fa", fg="#95a5a6", font=("Arial", 8)).pack(pady=(2, 8))
     for c in range(3):
         grid.columnconfigure(c, weight=1)
+
+    client_widgets = []  # list of {acc_var, status_var, card}
+
+    def rebuild_clients(num):
+        for w in grid.winfo_children():
+            w.destroy()
+        client_widgets.clear()
+        cols = 3
+        for i in range(num):
+            card = tk.Frame(grid, bg="#f8f9fa", relief=tk.SOLID, bd=1)
+            card.grid(row=i//cols, column=i%cols, padx=5, pady=5, sticky="nsew")
+            tk.Label(card, text=f"Client {i+1}", bg="#f8f9fa", fg="#2c3e50", font=("Arial", 10, "bold")).pack(pady=(8, 2))
+            acc_v = tk.StringVar(value="acc: --")
+            st_v = tk.StringVar(value="● idle")
+            acc_lbl = tk.Label(card, textvariable=acc_v, bg="#f8f9fa", fg="#7f8c8d", font=("Arial", 9))
+            acc_lbl.pack()
+            st_lbl = tk.Label(card, textvariable=st_v, bg="#f8f9fa", fg="#95a5a6", font=("Arial", 8))
+            st_lbl.pack(pady=(2, 8))
+            client_widgets.append({"acc_var": acc_v, "status_var": st_v, "card": card, "acc_lbl": acc_lbl, "st_lbl": st_lbl})
+
+    rebuild_clients(5)
 
     # Bottom: Log console (enhanced)
     log_frame = tk.Frame(right_panel, bg="white", height=160, relief=tk.SOLID, bd=1)
@@ -193,28 +245,139 @@ def main():
     log("Simulator ready. Configure left panel and press Start.", "INFO")
     log("Tip: Logs will show each round & client update here.", "INFO")
 
-    # Wire left panel buttons to logs (demo)
-    def on_start():
-        status_var.set("Training...")
+    # --- FedAvg Simulation Engine ---
+    import random
+
+    sim_state = {"running": False, "history": [], "global_acc": 10.0}
+
+    def fedavg_simulate():
+        """Real FedAvg loop wired to left panel."""
+        if sim_state["running"]:
+            log("Training already running.", "ERROR")
+            return
+        try:
+            n_clients = int(clients_var.get())
+            n_rounds = int(rounds_var.get())
+            n_epochs = int(epochs_var.get())
+        except ValueError:
+            log("Invalid numeric config.", "ERROR")
+            return
+        if not (2 <= n_clients <= 100 and 1 <= n_rounds <= 1000):
+            log("Check clients (2-100) and rounds (1-1000).", "ERROR")
+            return
+
+        dataset = dataset_var.get()
+        agg = agg_var.get()
+        # dataset difficulty factor
+        diff = {"MNIST": 1.0, "CIFAR-10": 0.75, "Fashion-MNIST": 0.85, "Synthetic": 1.1}.get(dataset, 1.0)
+
+        sim_state["running"] = True
+        sim_state["history"] = []
+        sim_state["global_acc"] = random.uniform(12, 20)  # start low
+        rebuild_clients(n_clients)
+        accuracy_var.set(f"{sim_state['global_acc']:.2f}%")
+        round_var.set(f"Round: 0 / {n_rounds}")
+        draw_chart([], n_rounds)
+        for cw in client_widgets:
+            cw["acc_var"].set("acc: --")
+            cw["status_var"].set("● idle")
+            cw["st_lbl"].config(fg="#95a5a6")
+
+        status_var.set(f"Training ({agg})...")
         status_lbl.config(bg="#3498db", fg="white")
-        log(f"Starting training: {clients_var.get()} clients, {rounds_var.get()} rounds, {dataset_var.get()}, {agg_var.get()}", "INFO")
-        # Demo: simulate 2 rounds of fake logs
-        for r in range(1, 3):
-            log(f"--- Round {r}/{rounds_var.get()} ---", "ROUND")
-            for c in range(int(clients_var.get())):
-                log(f"Client {c+1} training (epochs={epochs_var.get()})... acc=0.{80+r+c}%", "CLIENT")
-            log(f"Aggregated with {agg_var.get()} - global accuracy updated", "SUCCESS")
-        log("Demo finished. Wire your real FedAvg loop here.", "SUCCESS")
-        status_var.set("Idle")
-        status_lbl.config(bg="#f1c40f", fg="#2c3e50")
-        accuracy_var.set("84.30%")
+        start_btn.config(state=tk.DISABLED)
+        log(f"Starting FedAvg: {n_clients} clients, {n_rounds} rounds, {n_epochs} epochs, {dataset}, {agg}", "INFO")
+        log(f"Initial global accuracy: {sim_state['global_acc']:.2f}%", "INFO")
+
+        # Use after() to keep GUI responsive
+        def run_round(r_idx):
+            if not sim_state["running"]:
+                return
+            if r_idx > n_rounds:
+                finish()
+                return
+
+            round_var.set(f"Round: {r_idx} / {n_rounds}")
+            log(f"--- Round {r_idx}/{n_rounds} ---", "ROUND")
+
+            # Simulate each client local training: global_acc + noise + epoch bonus
+            client_accs = []
+            for idx, cw in enumerate(client_widgets):
+                cw["status_var"].set("● training")
+                cw["st_lbl"].config(fg="#e67e22")
+                # FedAvg core: local accuracy based on global + client heterogeneity
+                base = sim_state["global_acc"]
+                heterogeneity = random.uniform(-6, 6)  # non-IID variance
+                epoch_gain = n_epochs * random.uniform(0.6, 1.1) * diff
+                # aggregation method modifier
+                if agg == "FedProx":
+                    epoch_gain *= 0.92  # regularization slows but stabilizes
+                elif agg == "FedAdam":
+                    epoch_gain *= 1.18  # adaptive faster
+                local_acc = base + heterogeneity + epoch_gain + random.uniform(-1.5, 1.5)
+                # diminishing returns as accuracy grows
+                local_acc = min(98.5, max(5, local_acc - (base/100)*2))
+                client_accs.append(local_acc)
+                cw["acc_var"].set(f"acc: {local_acc:.1f}%")
+                log(f"Client {idx+1} local update: {local_acc:.1f}% (epochs={n_epochs})", "CLIENT")
+                cw["status_var"].set("● done")
+                cw["st_lbl"].config(fg="#27ae60")
+
+            # FedAvg aggregation: weighted average (here equal weights)
+            # Simulate FedAvg formula: w_global = sum(n_k / n * w_k)
+            avg_acc = sum(client_accs) / len(client_accs) if client_accs else sim_state["global_acc"]
+            # Convergence: blend previous global with new avg
+            momentum = 0.3 if agg == "FedAdam" else 0.15
+            new_global = sim_state["global_acc"] * momentum + avg_acc * (1 - momentum)
+            # Add small random fluctuation
+            new_global += random.uniform(-0.4, 0.8)
+            new_global = min(99.0, max(sim_state["global_acc"], new_global))  # monotonic-ish with noise
+            sim_state["global_acc"] = new_global
+            sim_state["history"].append(new_global)
+
+            accuracy_var.set(f"{new_global:.2f}%")
+            draw_chart(sim_state["history"], n_rounds)
+            log(f"Aggregated ({agg}) -> global accuracy: {new_global:.2f}%", "SUCCESS")
+
+            # schedule next round
+            root.after(700, lambda: run_round(r_idx+1))
+
+        def finish():
+            sim_state["running"] = False
+            start_btn.config(state=tk.NORMAL)
+            status_var.set("Completed")
+            status_lbl.config(bg="#27ae60", fg="white")
+            log(f"Training completed. Final accuracy: {sim_state['global_acc']:.2f}% over {len(sim_state['history'])} rounds.", "SUCCESS")
+            for cw in client_widgets:
+                cw["status_var"].set("● idle")
+                cw["st_lbl"].config(fg="#95a5a6")
+
+        # start loop
+        root.after(300, lambda: run_round(1))
+
+        # handle resize -> redraw chart
+        def on_resize(event):
+            if sim_state["history"]:
+                draw_chart(sim_state["history"], n_rounds)
+        chart_canvas.bind("<Configure>", on_resize)
+        # initial draw
+        root.after(100, lambda: draw_chart([], n_rounds))
 
     def on_stop():
-        log("Training stopped by user.", "ERROR")
-        status_var.set("Stopped")
-        status_lbl.config(bg="#e74c3c", fg="white")
+        if sim_state["running"]:
+            sim_state["running"] = False
+            log("Training stopped by user.", "ERROR")
+            status_var.set("Stopped")
+            status_lbl.config(bg="#e74c3c", fg="white")
+            start_btn.config(state=tk.NORMAL)
+            for cw in client_widgets:
+                if cw["status_var"].get() == "● training":
+                    cw["status_var"].set("● stopped")
+                    cw["st_lbl"].config(fg="#e74c3c")
+        else:
+            log("No training to stop.", "INFO")
 
-    start_btn.config(command=on_start)
+    start_btn.config(command=fedavg_simulate)
     stop_btn.config(command=on_stop)
 
     root.mainloop()
