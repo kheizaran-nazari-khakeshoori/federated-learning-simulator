@@ -1,4 +1,5 @@
 import tkinter as tk
+from algorithms import get_algorithm
 
 def main():
     root = tk.Tk()
@@ -251,7 +252,7 @@ def main():
     log("Simulator ready. Configure left panel and press Start.", "INFO")
     log("Tip: Logs will show each round & client update here.", "INFO")
 
-    # --- FedAvg Simulation Engine ---
+    # --- FedAvg Simulation Engine (now using 3 model files) ---
     import random
 
     sim_state = {"running": False, "history": [], "global_acc": 10.0}
@@ -276,6 +277,9 @@ def main():
         agg = agg_var.get()
         # dataset difficulty factor
         diff = {"MNIST": 1.0, "CIFAR-10": 0.75, "Fashion-MNIST": 0.85, "Synthetic": 1.1}.get(dataset, 1.0)
+        algo = get_algorithm(agg)  # -> algorithms/fedavg.py | fedprox.py | fedadam.py
+        if hasattr(algo, "reset"):
+            algo.reset()
 
         sim_state["running"] = True
         sim_state["history"] = []
@@ -292,8 +296,9 @@ def main():
         status_var.set(f"Training ({agg})...")
         status_lbl.config(bg="#3498db", fg="white")
         start_btn.config(state=tk.DISABLED)
-        log(f"Starting FedAvg: {n_clients} clients, {n_rounds} rounds, {n_epochs} epochs, {dataset}, {agg}", "INFO")
+        log(f"Starting {algo.name}: {n_clients} clients, {n_rounds} rounds, {n_epochs} epochs, {dataset}, {algo.name}", "INFO")
         log(f"Initial global accuracy: {sim_state['global_acc']:.2f}%", "INFO")
+        log(f"Loaded model: algorithms/{agg.lower()}.py", "INFO")
 
         # Dummy-loop style: animate each client sequentially, then aggregate + update chart/logs
         def run_round(r_idx):
@@ -318,39 +323,28 @@ def main():
                 if not sim_state["running"]:
                     return
                 if idx >= len(client_widgets):
-                    # all clients done -> aggregate (FedAvg)
-                    avg_acc = sum(client_accs) / len(client_accs) if client_accs else sim_state["global_acc"]
-                    momentum = 0.3 if agg == "FedAdam" else 0.15
-                    new_global = sim_state["global_acc"] * momentum + avg_acc * (1 - momentum)
-                    new_global += random.uniform(-0.4, 0.8)
-                    new_global = min(99.0, max(sim_state["global_acc"], new_global))
+                    # all clients done -> aggregate via selected algorithm file
+                    new_global = algo.aggregate(client_accs, sim_state["global_acc"])
                     sim_state["global_acc"] = new_global
                     sim_state["history"].append(new_global)
                     accuracy_var.set(f"{new_global:.2f}%")
                     draw_chart(sim_state["history"], n_rounds)
-                    log(f"Aggregated ({agg}) -> global accuracy: {new_global:.2f}%", "SUCCESS")
+                    log(f"Aggregated ({algo.name}) -> global accuracy: {new_global:.2f}%", "SUCCESS")
                     for cw in client_widgets:
                         cw["card"].config(bg="#f8f9fa")
                     root.after(600, lambda: run_round(r_idx+1))
                     return
 
                 cw = client_widgets[idx]
-                base = sim_state["global_acc"]
-                heterogeneity = random.uniform(-6, 6)
-                epoch_gain = n_epochs * random.uniform(0.6, 1.1) * diff
-                if agg == "FedProx":
-                    epoch_gain *= 0.92
-                elif agg == "FedAdam":
-                    epoch_gain *= 1.18
-                local_acc = base + heterogeneity + epoch_gain + random.uniform(-1.5, 1.5)
-                local_acc = min(98.5, max(5, local_acc - (base/100)*2))
+                # delegate to selected algorithm model file
+                local_acc = algo.local_update(sim_state["global_acc"], n_epochs, diff)
                 client_accs.append(local_acc)
 
                 # update card
                 cw["acc_var"].set(f"acc: {local_acc:.1f}%")
                 cw["bar"].place(relwidth=min(1, local_acc/100), relheight=1)
                 cw["bar"].config(bg="#27ae60" if local_acc > 70 else "#e67e22" if local_acc > 50 else "#e74c3c")
-                log(f"Client {idx+1} local update: {local_acc:.1f}% (epochs={n_epochs})", "CLIENT")
+                log(f"Client {idx+1} local update: {local_acc:.1f}% (epochs={n_epochs}) [{algo.name}]", "CLIENT")
                 cw["status_var"].set("● done")
                 cw["st_lbl"].config(fg="#27ae60")
 
