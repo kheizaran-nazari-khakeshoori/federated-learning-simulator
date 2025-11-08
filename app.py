@@ -58,8 +58,30 @@ def main():
     agg_menu.config(bg="white", font=("Arial", 10), width=12)
     agg_menu.pack(padx=15, fill=tk.X, pady=(0, 5))
 
+    # Dirichlet Alpha (Non-IID heterogeneity) - tune slider
+    add_section_label("NON-IID ALPHA (Dirichlet)")
+    alpha_var = tk.DoubleVar(value=0.5)
+    alpha_info = tk.Label(left_panel, text="0.1=very non-IID  •  10=IID-like", bg="#2c3e50", fg="#7f8c8d", font=("Arial", 7))
+    alpha_info.pack(padx=15, anchor="w")
+    alpha_row = tk.Frame(left_panel, bg="#2c3e50")
+    alpha_row.pack(fill=tk.X, padx=15, pady=(2, 5))
+    alpha_label = tk.Label(alpha_row, text="0.50", bg="#34495e", fg="white", font=("Arial", 9, "bold"), width=5)
+    alpha_label.pack(side=tk.RIGHT, padx=(5, 0))
+    def _fmt_alpha(v): return f"{float(v):.2f}"
+    alpha_scale = tk.Scale(alpha_row, from_=0.1, to=10.0, resolution=0.1, orient=tk.HORIZONTAL, variable=alpha_var,
+                           bg="#2c3e50", fg="white", troughcolor="#34495e", highlightthickness=0,
+                           activebackground="#3498db", showvalue=0, length=140,
+                           command=lambda v: alpha_label.config(text=_fmt_alpha(v)))
+    alpha_scale.pack(side=tk.LEFT, fill=tk.X, expand=True)
+    # preset buttons
+    preset_frame = tk.Frame(left_panel, bg="#2c3e50")
+    preset_frame.pack(fill=tk.X, padx=15, pady=(0, 5))
+    for val, txt in [(0.1, "High"), (0.5, "Med"), (10.0, "IID")]:
+        def _set(v=val): alpha_var.set(v); alpha_label.config(text=_fmt_alpha(v))
+        tk.Button(preset_frame, text=txt, command=_set, bg="#34495e", fg="#bdc3c7", font=("Arial", 7), relief=tk.FLAT, padx=6, pady=2).pack(side=tk.LEFT, padx=2)
+
     # Spacer
-    tk.Frame(left_panel, bg="#2c3e50", height=20).pack()
+    tk.Frame(left_panel, bg="#2c3e50", height=10).pack()
 
     # Start Button
     start_btn = tk.Button(left_panel, text="▶ Start Training", bg="#27ae60", fg="white", activebackground="#2ecc71",
@@ -291,8 +313,9 @@ def main():
             if len(X_train) > 6000:
                 idx = np.random.choice(len(X_train), 6000, replace=False)
                 X_train, y_train = X_train[idx], y_train[idx]
+            alpha = float(alpha_var.get())
             input_dim = X_train.shape[1]
-            partitions = partition_non_iid(X_train, y_train, n_clients, alpha=0.5, seed=42)
+            partitions = partition_non_iid(X_train, y_train, n_clients, alpha=alpha, seed=42)
             global_model = SimpleCNN(input_dim=input_dim, hidden=128, output=len(np.unique(y_train)), lr=0.05)
             init_acc = global_model.evaluate(X_test, y_test)
             sim_state["global_model"] = global_model
@@ -300,7 +323,7 @@ def main():
             sim_state["X_test"] = X_test
             sim_state["y_test"] = y_test
             log(f"Dataset {dataset} loaded: train {X_train.shape}, test {X_test.shape}, input_dim {input_dim}", "INFO")
-            log(f"Partitioned non-IID Dirichlet alpha=0.5 across {n_clients} clients", "INFO")
+            log(f"Partitioned non-IID Dirichlet alpha={alpha:.2f} across {n_clients} clients ({'high hetero' if alpha<0.3 else 'med' if alpha<2 else 'near IID'})", "INFO")
             log(f"Models: models/cnn.py (SimpleCNN {input_dim}->{128}->10) + algorithms/{agg.lower()}.py", "INFO")
         except Exception as e:
             log(f"Real dataset/model init failed ({e}), falling back to synthetic accuracy.", "ERROR")
