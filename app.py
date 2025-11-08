@@ -80,6 +80,26 @@ def main():
         def _set(v=val): alpha_var.set(v); alpha_label.config(text=_fmt_alpha(v))
         tk.Button(preset_frame, text=txt, command=_set, bg="#34495e", fg="#bdc3c7", font=("Arial", 7), relief=tk.FLAT, padx=6, pady=2).pack(side=tk.LEFT, padx=2)
 
+    # Learning Rate
+    add_section_label("LEARNING RATE")
+    lr_var = tk.DoubleVar(value=0.05)
+    tk.Label(left_panel, text="small=stable • large=fast/diverge", bg="#2c3e50", fg="#7f8c8d", font=("Arial", 7)).pack(padx=15, anchor="w")
+    lr_row = tk.Frame(left_panel, bg="#2c3e50")
+    lr_row.pack(fill=tk.X, padx=15, pady=(2, 5))
+    lr_label = tk.Label(lr_row, text="0.050", bg="#34495e", fg="white", font=("Arial", 9, "bold"), width=5)
+    lr_label.pack(side=tk.RIGHT, padx=(5, 0))
+    def _fmt_lr(v): return f"{float(v):.3f}"
+    lr_scale = tk.Scale(lr_row, from_=0.005, to=0.2, resolution=0.005, orient=tk.HORIZONTAL, variable=lr_var,
+                        bg="#2c3e50", fg="white", troughcolor="#34495e", highlightthickness=0,
+                        activebackground="#3498db", showvalue=0, length=140,
+                        command=lambda v: lr_label.config(text=_fmt_lr(v)))
+    lr_scale.pack(side=tk.LEFT, fill=tk.X, expand=True)
+    lr_preset = tk.Frame(left_panel, bg="#2c3e50")
+    lr_preset.pack(fill=tk.X, padx=15, pady=(0, 5))
+    for val, txt in [(0.01, "Low"), (0.05, "Med"), (0.1, "High")]:
+        def _set_lr(v=val): lr_var.set(v); lr_label.config(text=_fmt_lr(v))
+        tk.Button(lr_preset, text=txt, command=_set_lr, bg="#34495e", fg="#bdc3c7", font=("Arial", 7), relief=tk.FLAT, padx=6, pady=2).pack(side=tk.LEFT, padx=2)
+
     # Spacer
     tk.Frame(left_panel, bg="#2c3e50", height=10).pack()
 
@@ -314,9 +334,10 @@ def main():
                 idx = np.random.choice(len(X_train), 6000, replace=False)
                 X_train, y_train = X_train[idx], y_train[idx]
             alpha = float(alpha_var.get())
+            lr = float(lr_var.get())
             input_dim = X_train.shape[1]
             partitions = partition_non_iid(X_train, y_train, n_clients, alpha=alpha, seed=42)
-            global_model = SimpleCNN(input_dim=input_dim, hidden=128, output=len(np.unique(y_train)), lr=0.05)
+            global_model = SimpleCNN(input_dim=input_dim, hidden=128, output=len(np.unique(y_train)), lr=lr)
             init_acc = global_model.evaluate(X_test, y_test)
             sim_state["global_model"] = global_model
             sim_state["partitions"] = partitions
@@ -351,9 +372,9 @@ def main():
         status_var.set(f"Training ({algo.name})...")
         status_lbl.config(bg="#3498db", fg="white")
         start_btn.config(state=tk.DISABLED)
-        log(f"Starting {algo.name}: {n_clients} clients, {n_rounds} rounds, {n_epochs} epochs, {dataset}", "INFO")
+        log(f"Starting {algo.name}: {n_clients} clients, {n_rounds} rounds, {n_epochs} epochs, {dataset}, alpha={alpha:.2f}, lr={lr:.3f}", "INFO")
         log(f"Initial global accuracy: {init_acc:.2f}%", "INFO")
-        log(f"Loaded model: algorithms/{agg.lower()}.py", "INFO")
+        log(f"Loaded model: algorithms/{agg.lower()}.py + models/cnn.py lr={lr:.3f}", "INFO")
 
         # Dummy-loop style: animate each client sequentially, then aggregate + update chart/logs
         def run_round(r_idx):
@@ -407,13 +428,14 @@ def main():
                     Xk, yk = sim_state["partitions"][idx]
                     # client model copy of global
                     client_model = sim_state["global_model"].copy()
-                    # adjust lr for FedProx/FedAdam simulation
+                    # use LR slider value with small algo modifier
+                    base_lr = float(lr_var.get())
                     if agg == "FedProx":
-                        client_model.lr = 0.04
+                        client_model.lr = base_lr * 0.8
                     elif agg == "FedAdam":
-                        client_model.lr = 0.06
+                        client_model.lr = base_lr * 1.2
                     else:
-                        client_model.lr = 0.05
+                        client_model.lr = base_lr
                     local_acc = client_model.train(Xk, yk, epochs=n_epochs, batch_size=32)
                     # store weights for aggregation
                     if "client_weights" not in sim_state:
