@@ -69,17 +69,18 @@ def _try_sklearn_mnist():
         return None
 
 def _synthetic_dataset(n_train=6000, n_test=1000, n_classes=10, input_dim=784, seed=0):
-    """Fully offline fallback: 10 Gaussians in 784D, easy to learn."""
+    """Hard synthetic: closer centroids + higher noise + 5% label noise (no more 100% accuracy)."""
     rng = np.random.RandomState(seed)
-    # create class centroids
-    centroids = rng.randn(n_classes, input_dim) * 1.5
+    centroids = rng.randn(n_classes, input_dim) * 1.0  # closer -> harder
     def make_split(n):
         X = np.zeros((n, input_dim), dtype=np.float32)
         y = rng.randint(0, n_classes, size=n)
         for i in range(n):
-            X[i] = centroids[y[i]] + rng.randn(input_dim) * 0.8
-        # normalize to 0-1-ish via sigmoid
+            X[i] = centroids[y[i]] + rng.randn(input_dim) * 1.4  # more noise
         X = 1 / (1 + np.exp(-X * 0.5))
+        # 5% label noise -> prevents 100% ceiling
+        flip = rng.rand(n) < 0.05
+        y[flip] = rng.randint(0, n_classes, size=flip.sum())
         return X, y
     return make_split(n_train), make_split(n_test)
 
