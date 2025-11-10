@@ -66,34 +66,27 @@ def _synthetic_dataset(n_train=6000, n_test=1000, n_classes=10, input_dim=784, s
     return make_split(n_train), make_split(n_test)
 
 def get_dataset(name: str = "MNIST", root: str = "./data"):
-    """
-    name: MNIST | CIFAR-10 | Fashion-MNIST | Synthetic
-    Returns: (X_train, y_train), (X_test, y_test) as float32 numpy, y int64
-    """
+    """Prefer real MNIST, log source clearly."""
     name = name.upper()
     if name == "SYNTHETIC":
-        return _synthetic_dataset()
+        return _synthetic_dataset(seed=0)
 
-    # try torchvision first
     result = _try_torchvision(name, root)
     if result is not None:
         (Xtr, ytr), (Xte, yte) = result
-        print(f"Loaded {name} via torchvision: train {Xtr.shape}, test {Xte.shape}")
+        print(f"Loaded REAL {name} via torchvision: train {Xtr.shape}, test {Xte.shape}")
         return (Xtr, ytr), (Xte, yte)
 
-    # try sklearn only for MNIST
     if name == "MNIST":
         result = _try_sklearn_mnist()
         if result is not None:
-            print(f"Loaded MNIST via sklearn: train {result[0][0].shape}")
+            print(f"Loaded REAL MNIST via sklearn: train {result[0][0].shape}")
             return result
 
-    # fallback
-    print(f"Offline or missing deps -> using Synthetic for {name}")
+    print(f"Using HARD Synthetic for {name} (real not available offline)")
     n_classes = 10
     input_dim = 784 if name != "CIFAR-10" else 3072
-    train, test = _synthetic_dataset(n_train=6000, n_test=1000, n_classes=n_classes, input_dim=input_dim, seed=hash(name) % 1000)
-    return train, test
+    return _synthetic_dataset(n_train=6000, n_test=1000, n_classes=n_classes, input_dim=input_dim, seed=hash(name) % 1000)
 
 def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed: int = 0):
     """
