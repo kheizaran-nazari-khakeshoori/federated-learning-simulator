@@ -10,11 +10,10 @@ import os
 import numpy as np
 
 def _try_torchvision(dataset_name: str, root: str = "./data"):
-    """Try torchvision auto-download. Returns (X_train, y_train), (X_test, y_test) as numpy or None."""
+    """Try torchvision auto-download to ./data. Returns numpy (X,y) or None."""
     try:
         import torchvision
-        from torchvision import transforms
-        transform = transforms.ToTensor()
+        import torch
         mapping = {
             "MNIST": torchvision.datasets.MNIST,
             "FASHION-MNIST": torchvision.datasets.FashionMNIST,
@@ -23,37 +22,19 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         cls = mapping.get(dataset_name.upper())
         if cls is None:
             return None
-        train = cls(root=root, train=True, download=True, transform=transform)
-        test = cls(root=root, train=False, download=True, transform=transform)
-        # convert to numpy: (N, C, H, W) -> (N, 784) flattened normalized
+        train = cls(root=root, train=True, download=True)
+        test = cls(root=root, train=False, download=True)
         def to_numpy(ds):
-            X = np.stack([np.array(x) for x, _ in ds])  # if ToTensor, x is tensor
-            # handle tensor case
-            if hasattr(X[0], "numpy"):
-                X = np.stack([x.numpy() for x, _ in ds])
-            y = np.array([label for _, label in ds])
-            # flatten: (N,1,28,28) -> (N,784) for MNIST, (N,3,32,32)-> (N,3072)
-            if X.ndim == 4:
-                X = X.reshape(X.shape[0], -1)
-            return X.astype(np.float32), y.astype(np.int64)
-        # torchvision with ToTensor returns tensor, need manual handling
-        import torch
-        def ds_to_numpy(ds):
             X = ds.data.numpy() if hasattr(ds.data, "numpy") else np.array(ds.data)
             y = ds.targets.numpy() if hasattr(ds.targets, "numpy") else np.array(ds.targets)
-            # normalize 0-255 -> 0-1 and flatten
             X = X.astype(np.float32) / 255.0
             if X.ndim == 3:  # (N,28,28)
                 X = X.reshape(X.shape[0], -1)
-            elif X.ndim == 4:  # (N,32,32,3) or (N,28,28,1)
+            elif X.ndim == 4:
                 X = X.reshape(X.shape[0], -1)
             return X, y
-        try:
-            return ds_to_numpy(train), ds_to_numpy(test)
-        except Exception:
-            return to_numpy(train), to_numpy(test)
+        return to_numpy(train), to_numpy(test)
     except Exception as e:
-        # print(f"torchvision not available: {e}")
         return None
 
 def _try_sklearn_mnist():
