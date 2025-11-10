@@ -44,8 +44,9 @@ class SimpleCNN:
         return float(np.mean(pred == y) * 100)
 
     def train(self, X, y, epochs=1, batch_size=32, verbose=False):
-        """One local training: SGD for epochs. Returns final accuracy on X."""
+        """SGD with L2 decay 1e-4 to prevent 100% overfit on synthetic."""
         n = X.shape[0]
+        wd = 1e-4
         for ep in range(epochs):
             idx = np.random.permutation(n)
             X_shuf, y_shuf = X[idx], y[idx]
@@ -54,19 +55,16 @@ class SimpleCNN:
                 yb = y_shuf[i:i+batch_size]
                 logits, cache = self.forward(xb)
                 Xb, z1, h, logits = cache
-                # softmax + cross-entropy backward
                 probs = self._softmax(logits)
-                # one-hot
                 y_onehot = np.zeros_like(probs)
                 y_onehot[np.arange(len(yb)), yb] = 1
-                dlogits = (probs - y_onehot) / len(yb)  # (B,10)
-                dW2 = h.T @ dlogits
+                dlogits = (probs - y_onehot) / len(yb)
+                dW2 = h.T @ dlogits + wd * self.W2
                 db2 = dlogits.sum(axis=0)
                 dh = dlogits @ self.W2.T
                 dz1 = dh * self._relu_grad(z1)
-                dW1 = Xb.T @ dz1
+                dW1 = Xb.T @ dz1 + wd * self.W1
                 db1 = dz1.sum(axis=0)
-                # SGD
                 self.W2 -= self.lr * dW2
                 self.b2 -= self.lr * db2
                 self.W1 -= self.lr * dW1
