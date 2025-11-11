@@ -2,7 +2,7 @@
 import random
 import numpy as np
 from algorithms import get_algorithm
-from data.datasets import get_dataset, partition_non_iid
+from data.datasets import get_dataset, partition_non_iid, _is_real_available
 from models.cnn import SimpleCNN
 
 class Engine:
@@ -49,6 +49,8 @@ class Engine:
             init_acc = global_model.evaluate(X_test, y_test)
             self.sim_state.update({"global_model": global_model, "partitions": partitions, "X_test": X_test, "y_test": y_test})
             self.log(f"Dataset {dataset} loaded: train {X_train.shape}, test {X_test.shape}, input_dim {input_dim}", "INFO")
+            is_real = _is_real_available(dataset, "./data")
+            self.log(f"Verified source: {'REAL MNIST (cached)' if is_real else 'HARD Synthetic (real not found)'} -> expect {'85-92%' if is_real else '80-95% (harder synthetic)'}", "INFO")
             self.log(f"Partitioned non-IID Dirichlet alpha={alpha:.2f} across {n_clients} clients ({'high hetero' if alpha<0.3 else 'med' if alpha<2 else 'near IID'})", "INFO")
             for i, (Xk, yk) in enumerate(partitions):
                 hist = np.bincount(yk, minlength=len(np.unique(y_train)))
