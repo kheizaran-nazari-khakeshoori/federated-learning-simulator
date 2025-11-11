@@ -65,6 +65,11 @@ def _synthetic_dataset(n_train=6000, n_test=1000, n_classes=10, input_dim=784, s
         return X, y
     return make_split(n_train), make_split(n_test)
 
+def _ensure_data_dir(root: str = "./data"):
+    """Ensure ./data exists before download (creates if missing)."""
+    os.makedirs(root, exist_ok=True)
+    return root
+
 def _is_real_available(name: str, root: str = "./data") -> bool:
     """Check if torchvision already downloaded real dataset to disk."""
     name = name.upper()
@@ -78,6 +83,7 @@ def _is_real_available(name: str, root: str = "./data") -> bool:
 
 def get_dataset(name: str = "MNIST", root: str = "./data"):
     """Prefer real MNIST, log cached vs downloading."""
+    _ensure_data_dir(root)
     name = name.upper()
     if name == "SYNTHETIC":
         return _synthetic_dataset(seed=0)
