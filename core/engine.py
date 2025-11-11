@@ -50,6 +50,9 @@ class Engine:
             self.sim_state.update({"global_model": global_model, "partitions": partitions, "X_test": X_test, "y_test": y_test})
             self.log(f"Dataset {dataset} loaded: train {X_train.shape}, test {X_test.shape}, input_dim {input_dim}", "INFO")
             self.log(f"Partitioned non-IID Dirichlet alpha={alpha:.2f} across {n_clients} clients ({'high hetero' if alpha<0.3 else 'med' if alpha<2 else 'near IID'})", "INFO")
+            for i, (Xk, yk) in enumerate(partitions):
+                hist = np.bincount(yk, minlength=len(np.unique(y_train)))
+                self.log(f"Client {i+1}: {len(yk)} samples labels {hist.tolist()}", "INFO")
             self.log(f"Models: models/cnn.py (SimpleCNN {input_dim}->{128}->10) + algorithms/{agg.lower()}.py", "INFO")
         except Exception as e:
             self.log(f"Real dataset/model init failed ({e}), falling back to synthetic accuracy.", "ERROR")
