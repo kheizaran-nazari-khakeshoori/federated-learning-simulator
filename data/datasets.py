@@ -65,6 +65,17 @@ def _synthetic_dataset(n_train=6000, n_test=1000, n_classes=10, input_dim=784, s
         return X, y
     return make_split(n_train), make_split(n_test)
 
+def _is_real_available(name: str, root: str = "./data") -> bool:
+    """Check if torchvision already downloaded real dataset to disk."""
+    name = name.upper()
+    if name == "MNIST":
+        return os.path.exists(os.path.join(root, "MNIST", "raw", "train-images-idx3-ubyte"))
+    if name == "FASHION-MNIST":
+        return os.path.exists(os.path.join(root, "FashionMNIST", "raw", "train-images-idx3-ubyte"))
+    if name == "CIFAR-10":
+        return os.path.exists(os.path.join(root, "cifar-10-batches-py", "data_batch_1"))
+    return False
+
 def get_dataset(name: str = "MNIST", root: str = "./data"):
     """Prefer real MNIST, log source clearly."""
     name = name.upper()
