@@ -77,10 +77,15 @@ def _is_real_available(name: str, root: str = "./data") -> bool:
     return False
 
 def get_dataset(name: str = "MNIST", root: str = "./data"):
-    """Prefer real MNIST, log source clearly."""
+    """Prefer real MNIST, log cached vs downloading."""
     name = name.upper()
     if name == "SYNTHETIC":
         return _synthetic_dataset(seed=0)
+
+    if _is_real_available(name, root):
+        print(f"REAL {name} cached at {root}, loading...")
+    else:
+        print(f"REAL {name} not cached, attempting download to {root}...")
 
     result = _try_torchvision(name, root)
     if result is not None:
