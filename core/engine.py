@@ -110,7 +110,8 @@ class Engine:
                     self.sim_state["history"].append(new_global)
                     self.right["accuracy_var"].set(f"{new_global:.2f}%")
                     self.right["draw_chart"](self.sim_state["history"], n_rounds)
-                    self.log(f"Aggregated ({algo.name}) via {'weights' if use_real else 'accuracy'} -> global {new_global:.2f}%", "SUCCESS")
+                    avg_client = sum(client_accs)/len(client_accs) if client_accs else 0
+                    self.log(f"Aggregated ({algo.name}) via {'weights' if use_real else 'accuracy'} -> global {new_global:.2f}% (avg client {avg_client:.1f}%)", "SUCCESS")
                     for cw in self.right["client_widgets"]:
                         cw["card"].config(bg="#f8f9fa")
                     self.root.after(600, lambda: run_round(r_idx+1))
