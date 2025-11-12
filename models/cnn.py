@@ -71,6 +71,10 @@ class SimpleCNN:
                 self.b1 -= self.lr * db1
         return self.evaluate(X, y)
 
+    def count_params(self) -> int:
+        """Return total trainable params for logging."""
+        return int(self.W1.size + self.b1.size + self.W2.size + self.b2.size)
+
     def get_weights(self):
         # flat vector for FedAvg averaging
         return np.concatenate([self.W1.ravel(), self.b1, self.W2.ravel(), self.b2])
