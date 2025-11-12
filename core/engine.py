@@ -46,6 +46,7 @@ class Engine:
             input_dim = X_train.shape[1]
             partitions = partition_non_iid(X_train, y_train, n_clients, alpha=alpha, seed=42)
             global_model = SimpleCNN(input_dim=input_dim, hidden=128, output=len(np.unique(y_train)), lr=lr)
+            self.log(f"Model SimpleCNN params: {global_model.count_params()} (input {input_dim} ->128->10)", "INFO")
             init_acc = global_model.evaluate(X_test, y_test)
             self.sim_state.update({"global_model": global_model, "partitions": partitions, "X_test": X_test, "y_test": y_test})
             self.log(f"Dataset {dataset} loaded: train {X_train.shape}, test {X_test.shape}, input_dim {input_dim}", "INFO")
