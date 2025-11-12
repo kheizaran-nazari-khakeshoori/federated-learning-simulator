@@ -85,12 +85,14 @@ class Engine:
         self.log(f"Initial global accuracy: {init_acc:.2f}%", "INFO")
         self.log(f"Loaded model: algorithms/{agg.lower()}.py + models/cnn.py lr={lr:.3f}", "INFO")
 
+        import time
         def run_round(r_idx):
             if not self.sim_state["running"]:
                 return
             if r_idx > n_rounds:
                 finish()
                 return
+            t0 = time.time()
             self.right["round_var"].set(f"Round: {r_idx} / {n_rounds}")
             self.log(f"--- Round {r_idx}/{n_rounds} ---", "ROUND")
             for cw in self.right["client_widgets"]:
@@ -117,7 +119,8 @@ class Engine:
                     self.right["accuracy_var"].set(f"{new_global:.2f}%")
                     self.right["draw_chart"](self.sim_state["history"], n_rounds)
                     avg_client = sum(client_accs)/len(client_accs) if client_accs else 0
-                    self.log(f"Aggregated ({algo.name}) via {'weights' if use_real else 'accuracy'} -> global {new_global:.2f}% (avg client {avg_client:.1f}%)", "SUCCESS")
+                    dt = time.time() - t0
+                    self.log(f"Aggregated ({algo.name}) via {'weights' if use_real else 'accuracy'} -> global {new_global:.2f}% (avg client {avg_client:.1f}%, {dt:.1f}s)", "SUCCESS")
                     for cw in self.right["client_widgets"]:
                         cw["card"].config(bg="#f8f9fa")
                     self.root.after(600, lambda: run_round(r_idx+1))
