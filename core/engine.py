@@ -164,6 +164,12 @@ class Engine:
             self.right["status_var"].set("Completed")
             self.right["status_lbl"].config(bg="#27ae60", fg="white")
             self.log(f"Training completed. Final accuracy: {self.sim_state['global_acc']:.2f}% over {len(self.sim_state['history'])} rounds.", "SUCCESS")
+            if self.sim_state["global_model"] is not None:
+                try:
+                    np.save("global_weights.npy", self.sim_state["global_model"].get_weights())
+                    self.log("Saved global_weights.npy", "INFO")
+                except Exception as e:
+                    self.log(f"Save failed: {e}", "ERROR")
             for cw in self.right["client_widgets"]:
                 cw["status_var"].set("● idle")
                 cw["st_lbl"].config(fg="#95a5a6")
