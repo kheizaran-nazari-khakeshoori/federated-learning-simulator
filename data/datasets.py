@@ -110,6 +110,16 @@ def get_dataset(name: str = "MNIST", root: str = "./data"):
     input_dim = 784 if name != "CIFAR-10" else 3072
     return _synthetic_dataset(n_train=6000, n_test=1000, n_classes=n_classes, input_dim=input_dim, seed=hash(name) % 1000)
 
+def get_dataset_info(name: str) -> str:
+    """Return short description for GUI tooltip."""
+    info = {
+        "MNIST": "MNIST 70k 28x28 grayscale digits (10 classes)",
+        "FASHION-MNIST": "Fashion-MNIST 70k 28x28 fashion items",
+        "CIFAR-10": "CIFAR-10 60k 32x32 color images",
+        "SYNTHETIC": "Synthetic hard Gaussians (offline, 5% label noise)",
+    }
+    return info.get(name.upper(), "Unknown dataset")
+
 def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed: int = 0):
     """
     Dirichlet partition: alpha -> heterogeneity
