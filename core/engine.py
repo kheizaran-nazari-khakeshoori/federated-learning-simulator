@@ -121,6 +121,8 @@ class Engine:
                     avg_client = sum(client_accs)/len(client_accs) if client_accs else 0
                     dt = time.time() - t0
                     self.log(f"Aggregated ({algo.name}) via {'weights' if use_real else 'accuracy'} -> global {new_global:.2f}% (avg client {avg_client:.1f}%, {dt:.1f}s)", "SUCCESS")
+                    if len(self.sim_state["history"]) >= 3 and max(self.sim_state["history"][-3:]) - min(self.sim_state["history"][-3:]) < 0.5:
+                        self.log("Plateau detected (last 3 rounds <0.5% gain) - consider higher LR or more clients", "INFO")
                     for cw in self.right["client_widgets"]:
                         cw["card"].config(bg="#f8f9fa")
                     self.root.after(600, lambda: run_round(r_idx+1))
