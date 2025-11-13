@@ -1,5 +1,6 @@
 """Left control panel - separate module."""
 import tkinter as tk
+from data.datasets import get_dataset_info
 
 def create_left_panel(root):
     left_panel = tk.Frame(root, bg="#2c3e50", width=260)
@@ -31,6 +32,10 @@ def create_left_panel(root):
     m = tk.OptionMenu(left_panel, dataset_var, "MNIST", "CIFAR-10", "Fashion-MNIST", "Synthetic")
     m.config(bg="white", font=("Arial", 10), width=12)
     m.pack(padx=15, fill=tk.X, pady=(0, 5))
+    info_lbl = tk.Label(left_panel, text=get_dataset_info("MNIST"), bg="#2c3e50", fg="#7f8c8d", font=("Arial", 7), wraplength=220, justify="left")
+    info_lbl.pack(padx=15, anchor="w", pady=(0, 5))
+    def _update_info(*a): info_lbl.config(text=get_dataset_info(dataset_var.get()))
+    dataset_var.trace_add("write", _update_info)
 
     add_section_label("AGGREGATION")
     agg_var = tk.StringVar(value="FedAvg")
