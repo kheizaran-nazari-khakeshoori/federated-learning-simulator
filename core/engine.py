@@ -123,6 +123,10 @@ class Engine:
                     self.log(f"Aggregated ({algo.name}) via {'weights' if use_real else 'accuracy'} -> global {new_global:.2f}% (avg client {avg_client:.1f}%, {dt:.1f}s)", "SUCCESS")
                     if len(self.sim_state["history"]) >= 3 and max(self.sim_state["history"][-3:]) - min(self.sim_state["history"][-3:]) < 0.5:
                         self.log("Plateau detected (last 3 rounds <0.5% gain) - consider higher LR or more clients", "INFO")
+                    if len(self.sim_state["history"]) >= 5 and max(self.sim_state["history"][-5:]) - min(self.sim_state["history"][-5:]) < 0.3:
+                        self.log("Early stopping - no improvement for 5 rounds", "INFO")
+                        finish()
+                        return
                     for cw in self.right["client_widgets"]:
                         cw["card"].config(bg="#f8f9fa")
                     self.root.after(600, lambda: run_round(r_idx+1))
