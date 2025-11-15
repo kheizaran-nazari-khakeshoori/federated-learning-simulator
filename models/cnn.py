@@ -71,6 +71,9 @@ class SimpleCNN:
                 self.b1 -= self.lr * db1
         return self.evaluate(X, y)
 
+    def summary(self) -> str:
+        return f"SimpleCNN {self.input_dim}->{self.hidden}->{self.output} ({self.count_params()} params)"
+
     def count_params(self) -> int:
         """Return total trainable params for logging."""
         return int(self.W1.size + self.b1.size + self.W2.size + self.b2.size)
