@@ -105,8 +105,7 @@ class Engine:
                 cw["status_var"].set("● training")
                 cw["st_lbl"].config(fg="#e67e22")
                 cw["card"].config(bg="#fef9e7")
-            # client sampling fraction C (FedAvg: random subset per round)
-            C = 1.0  # will be wired to slider next commit
+            C = float(self.left["client_frac_var"].get()) if "client_frac_var" in self.left else 1.0
             m = max(1, int(len(self.right["client_widgets"]) * C))
             sampled_idx = sorted(random.sample(range(len(self.right["client_widgets"])), m))
             self.log(f"Sampled {m}/{len(self.right['client_widgets'])} clients: {[i+1 for i in sampled_idx]} (C={C})", "INFO")

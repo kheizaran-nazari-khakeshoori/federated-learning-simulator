@@ -79,6 +79,24 @@ def create_left_panel(root):
         def _set_lr(v=val): lr_var.set(v); lr_label.config(text=_fmt_lr(v))
         tk.Button(lr_preset, text=txt, command=_set_lr, bg="#34495e", fg="#bdc3c7", font=("Arial", 7), relief=tk.FLAT, padx=6, pady=2).pack(side=tk.LEFT, padx=2)
 
+    add_section_label("CLIENT FRACTION C")
+    client_frac_var = tk.DoubleVar(value=1.0)
+    tk.Label(left_panel, text="fraction sampled per round", bg="#2c3e50", fg="#7f8c8d", font=("Arial", 7)).pack(padx=15, anchor="w")
+    c_row = tk.Frame(left_panel, bg="#2c3e50")
+    c_row.pack(fill=tk.X, padx=15, pady=(2, 5))
+    c_label = tk.Label(c_row, text="1.00", bg="#34495e", fg="white", font=("Arial", 9, "bold"), width=5)
+    c_label.pack(side=tk.RIGHT, padx=(5, 0))
+    def _fmt_c(v): return f"{float(v):.2f}"
+    tk.Scale(c_row, from_=0.2, to=1.0, resolution=0.1, orient=tk.HORIZONTAL, variable=client_frac_var,
+             bg="#2c3e50", fg="white", troughcolor="#34495e", highlightthickness=0,
+             activebackground="#3498db", showvalue=0, length=140,
+             command=lambda v: c_label.config(text=_fmt_c(v))).pack(side=tk.LEFT, fill=tk.X, expand=True)
+    c_preset = tk.Frame(left_panel, bg="#2c3e50")
+    c_preset.pack(fill=tk.X, padx=15, pady=(0, 5))
+    for val, txt in [(0.5, "50%"), (0.8, "80%"), (1.0, "100%")]:
+        def _set_c(v=val): client_frac_var.set(v); c_label.config(text=_fmt_c(v))
+        tk.Button(c_preset, text=txt, command=_set_c, bg="#34495e", fg="#bdc3c7", font=("Arial", 7), relief=tk.FLAT, padx=6, pady=2).pack(side=tk.LEFT, padx=2)
+
     tk.Frame(left_panel, bg="#2c3e50", height=10).pack()
 
     start_btn = tk.Button(left_panel, text="▶ Start Training", bg="#27ae60", fg="white", activebackground="#2ecc71",
@@ -98,6 +116,7 @@ def create_left_panel(root):
         "agg_var": agg_var,
         "alpha_var": alpha_var,
         "lr_var": lr_var,
+        "client_frac_var": client_frac_var,
         "start_btn": start_btn,
         "stop_btn": stop_btn,
     }
