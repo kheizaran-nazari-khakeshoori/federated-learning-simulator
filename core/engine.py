@@ -97,14 +97,25 @@ class Engine:
             self.log(f"--- Round {r_idx}/{n_rounds} ---", "ROUND")
             for cw in self.right["client_widgets"]:
                 cw["bar"].place(relwidth=0, relheight=1)
+                cw["status_var"].set("● idle")
+                cw["st_lbl"].config(fg="#95a5a6")
+                cw["card"].config(bg="#f8f9fa")
+            for idx in sampled_idx:
+                cw = self.right["client_widgets"][idx]
                 cw["status_var"].set("● training")
                 cw["st_lbl"].config(fg="#e67e22")
                 cw["card"].config(bg="#fef9e7")
+            # client sampling fraction C (FedAvg: random subset per round)
+            C = 1.0  # will be wired to slider next commit
+            m = max(1, int(len(self.right["client_widgets"]) * C))
+            sampled_idx = sorted(random.sample(range(len(self.right["client_widgets"])), m))
+            self.log(f"Sampled {m}/{len(self.right['client_widgets'])} clients: {[i+1 for i in sampled_idx]} (C={C})", "INFO")
             client_accs = []
-            def animate_client(idx):
+            def animate_client(pos):
                 if not self.sim_state["running"]:
                     return
-                if idx >= len(self.right["client_widgets"]):
+                if pos >= len(sampled_idx):
+                    # all sampled clients done -> aggregate
                     if use_real and self.sim_state["global_model"] is not None:
                         avg_weights = algo.aggregate_weights(self.sim_state["client_weights"], self.sim_state["client_sizes"])
                         self.sim_state["global_model"].set_weights(avg_weights)
@@ -131,9 +142,10 @@ class Engine:
                         cw["card"].config(bg="#f8f9fa")
                     self.root.after(600, lambda: run_round(r_idx+1))
                     return
-                cw = self.right["client_widgets"][idx]
+                actual = sampled_idx[pos]
+                cw = self.right["client_widgets"][actual]
                 if use_real and self.sim_state["partitions"] is not None:
-                    Xk, yk = self.sim_state["partitions"][idx]
+                    Xk, yk = self.sim_state["partitions"][actual]
                     client_model = self.sim_state["global_model"].copy()
                     base_lr = float(self.left["lr_var"].get())
                     if agg == "FedProx":
@@ -153,11 +165,11 @@ class Engine:
                 cw["acc_var"].set(f"acc: {local_acc:.1f}%")
                 cw["bar"].place(relwidth=min(1, local_acc/100), relheight=1)
                 cw["bar"].config(bg="#27ae60" if local_acc > 70 else "#e67e22" if local_acc > 50 else "#e74c3c")
-                self.log(f"Client {idx+1} local train: {local_acc:.1f}% on {len(self.sim_state['partitions'][idx][0]) if use_real else 'synthetic'} samples [{algo.name}]", "CLIENT")
+                self.log(f"Client {actual+1} local train: {local_acc:.1f}% on {len(self.sim_state['partitions'][actual][0]) if use_real else 'synthetic'} samples [{algo.name}]", "CLIENT")
                 cw["status_var"].set("● done")
                 cw["st_lbl"].config(fg="#27ae60")
                 self.root.update_idletasks()
-                self.root.after(80, lambda: animate_client(idx+1))
+                self.root.after(80, lambda: animate_client(pos+1))
             self.sim_state["client_weights"] = []
             self.sim_state["client_sizes"] = []
             animate_client(0)
