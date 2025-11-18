@@ -130,7 +130,8 @@ class Engine:
                     self.right["draw_chart"](self.sim_state["history"], n_rounds)
                     avg_client = sum(client_accs)/len(client_accs) if client_accs else 0
                     dt = time.time() - t0
-                    self.log(f"Aggregated ({algo.name}) via {'weights' if use_real else 'accuracy'} -> global {new_global:.2f}% (avg client {avg_client:.1f}%, {dt:.1f}s)", "SUCCESS")
+                    comm_mb = (len(self.sim_state["history"]) * m * self.sim_state["global_model"].count_params() * 4 / 1e6) if use_real else 0
+                    self.log(f"Aggregated ({algo.name}) via {'weights' if use_real else 'accuracy'} -> global {new_global:.2f}% (avg client {avg_client:.1f}%, {dt:.1f}s, comm {comm_mb:.1f}MB)", "SUCCESS")
                     if len(self.sim_state["history"]) >= 3 and max(self.sim_state["history"][-3:]) - min(self.sim_state["history"][-3:]) < 0.5:
                         self.log("Plateau detected (last 3 rounds <0.5% gain) - consider higher LR or more clients", "INFO")
                     if len(self.sim_state["history"]) >= 5 and max(self.sim_state["history"][-5:]) - min(self.sim_state["history"][-5:]) < 0.3:
