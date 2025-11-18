@@ -142,6 +142,9 @@ class Engine:
                         self.log("Early stopping - no improvement for 5 rounds", "INFO")
                         finish()
                         return
+                    # LR decay per round for stability
+                    if use_real and self.sim_state["global_model"] is not None:
+                        self.sim_state["global_model"].lr *= 0.995
                     for cw in self.right["client_widgets"]:
                         cw["card"].config(bg="#f8f9fa")
                     self.root.after(600, lambda: run_round(r_idx+1))
