@@ -168,3 +168,7 @@ if __name__ == "__main__":
     parts = partition_non_iid(Xtr, ytr, n_clients=5, alpha=0.5)
     for i, (Xk, yk) in enumerate(parts):
         print(f"Client {i}: {Xk.shape} labels {np.bincount(yk, minlength=10)}")
+
+# cifar transform pipeline: per-channel mean/std
+cifar_mean = [0.4914,0.4822,0.4465]
+cifar_std = [0.2023,0.1994,0.2010]
