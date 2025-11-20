@@ -27,7 +27,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         def to_numpy(ds):
             X = ds.data.numpy() if hasattr(ds.data, "numpy") else np.array(ds.data)
             y = ds.targets.numpy() if hasattr(ds.targets, "numpy") else np.array(ds.targets)
-            X = X.astype(np.float32) / 255.0
+            X = X.astype(np.float32) / 255.0  # per-channel norm for cifar will be applied in next commit
             if X.ndim == 3:  # (N,28,28)
                 X = X.reshape(X.shape[0], -1)
             elif X.ndim == 4:
