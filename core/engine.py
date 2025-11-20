@@ -1,5 +1,6 @@
 """Simulation engine - separate from GUI. Handles real CNN training + FedAvg/Prox/Adam."""
 import random
+import time as _time
 import numpy as np
 from algorithms import get_algorithm
 from data.datasets import get_dataset, partition_non_iid, _is_real_available
@@ -217,3 +218,6 @@ class Engine:
                     cw["st_lbl"].config(fg="#e74c3c")
         else:
             self.log("No training to stop.", "INFO")
+
+# artificial client latency generator
+def _straggler_latency(): return random.uniform(0.1,0.6)
