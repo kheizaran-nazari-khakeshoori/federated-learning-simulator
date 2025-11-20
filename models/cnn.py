@@ -184,3 +184,7 @@ if __name__ == "__main__":
     print("init acc", m.evaluate(Xte, yte))
     acc = m.train(parts[0][0], parts[0][1], epochs=3)
     print("after 3 epochs on client0", acc, m.evaluate(Xte, yte))
+
+# tabular mlp branch for non-image data
+def tabular_mlp(input_dim, hidden=64):
+    return SimpleCNN(input_dim=input_dim, hidden=hidden)
