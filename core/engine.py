@@ -163,6 +163,7 @@ class Engine:
                     else:
                         client_model.lr = base_lr
                     local_acc = client_model.train(Xk, yk, epochs=n_epochs, batch_size=32)
+                    _time.sleep(_straggler_latency()*0.3)  # straggler delay
                     self.sim_state.setdefault("client_weights", []).append(client_model.get_weights())
                     self.sim_state.setdefault("client_sizes", []).append(len(yk))
                 else:
