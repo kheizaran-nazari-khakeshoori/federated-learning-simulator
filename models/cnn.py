@@ -166,13 +166,13 @@ try:
                 p.data.copy_(torch.from_numpy(arr))
                 pointer += num
 
-    def get_model(input_dim=784, use_torch=True, **kwargs):
+    def get_model(input_dim=784, output_dim=10, use_torch=True, **kwargs):
         if use_torch:
             return TorchCNN(input_dim=input_dim, **kwargs)
         return SimpleCNN(input_dim=input_dim, **kwargs)
 
 except ImportError:
-    def get_model(input_dim=784, use_torch=False, **kwargs):
+    def get_model(input_dim=784, output_dim=10, use_torch=False, **kwargs):
         return SimpleCNN(input_dim=input_dim, **kwargs)
 
 if __name__ == "__main__":
