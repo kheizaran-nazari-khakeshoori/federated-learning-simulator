@@ -13,7 +13,7 @@ class FedProx(BaseFLAlgorithm):
     name = "FedProx"
 
     def __init__(self, mu: float = 0.1):
-        self.mu = mu  # proximal strength
+        self.mu = mu  # proximal strength - exposed to UI slider next
 
     def local_update(self, global_acc: float, n_epochs: int, dataset_diff: float) -> float:
         heterogeneity = random.uniform(-6, 6)
