@@ -38,6 +38,9 @@ def create_left_panel(root):
     dataset_var.trace_add("write", _update_info)
 
     add_section_label("AGGREGATION")
+    # mu slider wired in next engine commit
+    mu_var = tk.DoubleVar(value=0.1)
+    tk.Scale(left_panel, from_=0.01, to=1.0, resolution=0.01, variable=mu_var, orient=tk.HORIZONTAL).pack()
     agg_var = tk.StringVar(value="FedAvg")
     m2 = tk.OptionMenu(left_panel, agg_var, "FedAvg", "FedProx", "FedAdam")
     m2.config(bg="white", font=("Arial", 10), width=12)
