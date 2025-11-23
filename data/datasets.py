@@ -6,7 +6,7 @@ Real datasets for Federated Learning simulator.
 
 Partitioning: Dirichlet non-IID (alpha controls heterogeneity)
 """
-import os
+import os  # used for _ensure_data_dir
 import numpy as np
 
 def _try_torchvision(dataset_name: str, root: str = "./data"):
