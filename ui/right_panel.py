@@ -162,6 +162,12 @@ def create_right_panel(root):
     tk.Button(log_header, text="Save", command=save_logs, bg="#ecf0f1", fg="#2c3e50", font=("Arial", 8), relief=tk.FLAT, padx=8, pady=2).pack(side=tk.RIGHT, padx=2)
     tk.Button(log_header, text="Clear", command=clear_logs, bg="#ecf0f1", fg="#2c3e50", font=("Arial", 8), relief=tk.FLAT, padx=8, pady=2).pack(side=tk.RIGHT, padx=2)
 
+    # confusion 10x10 grid placeholder
+    confusion_frame = tk.Frame(viz_frame, bg="white", height=80)
+    confusion_frame.pack(fill=tk.X, pady=5)
+    confusion_grid = tk.Canvas(confusion_frame, bg="white", height=70, highlightthickness=0)
+    confusion_grid.pack(fill=tk.BOTH, expand=True)
+    confusion_grid.create_text(200,35,text="confusion matrix 10x10",fill="#bdc3c7",font=("Arial",8))
     log("Simulator ready. Configure left panel and press Start.", "INFO")
     log("Tip: Logs will show each round & client update here.", "INFO")
 
