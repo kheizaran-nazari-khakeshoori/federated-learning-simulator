@@ -162,6 +162,7 @@ def create_right_panel(root):
         except Exception as e:
             log(f"Save failed: {e}", "ERROR")
 
+    tk.Button(log_header, text="Export PNG", command=lambda: export_canvas(chart_canvas), bg="#ecf0f1", fg="#2c3e50", font=("Arial",8), relief=tk.FLAT, padx=6).pack(side=tk.RIGHT, padx=2)
     tk.Button(log_header, text="Save", command=save_logs, bg="#ecf0f1", fg="#2c3e50", font=("Arial", 8), relief=tk.FLAT, padx=8, pady=2).pack(side=tk.RIGHT, padx=2)
     tk.Button(log_header, text="Clear", command=clear_logs, bg="#ecf0f1", fg="#2c3e50", font=("Arial", 8), relief=tk.FLAT, padx=8, pady=2).pack(side=tk.RIGHT, padx=2)
 
