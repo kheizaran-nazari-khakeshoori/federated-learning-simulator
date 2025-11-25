@@ -100,6 +100,11 @@ def create_right_panel(root):
             bar_fill = tk.Frame(bar_bg, bg="#27ae60")
             bar_fill.place(relwidth=0, relheight=1)
             client_widgets.append({"acc_var": acc_v, "status_var": st_v, "card": card, "acc_lbl": acc_lbl, "st_lbl": st_lbl, "bar": bar_fill, "bar_bg": bar_bg})
+    # label histogram canvas (per-client label dist)
+    hist_frame = tk.Frame(viz_frame, bg="white", height=60)
+    hist_frame.pack(fill=tk.X, pady=(0,5))
+    hist_canvas = tk.Canvas(hist_frame, bg="white", height=50, highlightthickness=0)
+    hist_canvas.pack(fill=tk.BOTH, expand=True)
     rebuild_clients(5)
 
     log_frame = tk.Frame(right_panel, bg="white", height=160, relief=tk.SOLID, bd=1)
