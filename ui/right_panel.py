@@ -146,6 +146,9 @@ def create_right_panel(root):
         if autoscroll_var.get():
             log_text.see(tk.END)
 
+    def export_canvas(canvas, path="chart.eps"):
+        try: canvas.postscript(file=path); return True
+        except: return False
     def clear_logs():
         log_text.config(state=tk.NORMAL)
         log_text.delete("1.0", tk.END)
