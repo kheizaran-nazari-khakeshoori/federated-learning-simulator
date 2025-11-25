@@ -188,3 +188,9 @@ if __name__ == "__main__":
 # tabular mlp branch for non-image data
 def tabular_mlp(input_dim, hidden=64):
     return SimpleCNN(input_dim=input_dim, hidden=hidden)
+
+def confusion_matrix(y_true, y_pred, n_classes=10):
+    import numpy as np
+    m=np.zeros((n_classes,n_classes),dtype=int)
+    for t,p in zip(y_true,y_pred): m[t,p]+=1
+    return m
