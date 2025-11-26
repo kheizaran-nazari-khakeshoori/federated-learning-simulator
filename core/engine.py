@@ -191,12 +191,26 @@ class Engine:
             self.sim_state["personalized_acc"] = self.sim_state["global_acc"] * 0.98  # placeholder personalized metric
             self.log(f"Personalized model metrics: {self.sim_state['personalized_acc']:.2f}%", "INFO")
             self.log(f"Training completed. Final accuracy: {self.sim_state['global_acc']:.2f}% over {len(self.sim_state['history'])} rounds.", "SUCCESS")
-            if self.sim_state["global_model"] is not None:
+            import csv
+                    # write CSV exporter
+                    try:
+                        with open("history.csv","w",newline="") as f:
+                            w=csv.writer(f); w.writerow(["round","accuracy"])
+                            [w.writerow([i+1,a]) for i,a in enumerate(self.sim_state["history"])]
+                    except: pass
+                    if self.sim_state["global_model"] is not None:
                 # local finetuning step post-eval (1 epoch on test subset)
                 try:
                     _ = self.sim_state["global_model"].train(self.sim_state["X_test"][:200], self.sim_state["y_test"][:200], epochs=1)
                 except: pass
-                if self.sim_state["global_model"] is not None:
+                import csv
+                    # write CSV exporter
+                    try:
+                        with open("history.csv","w",newline="") as f:
+                            w=csv.writer(f); w.writerow(["round","accuracy"])
+                            [w.writerow([i+1,a]) for i,a in enumerate(self.sim_state["history"])]
+                    except: pass
+                    if self.sim_state["global_model"] is not None:
                 try:
                     np.save("global_weights.npy", self.sim_state["global_model"].get_weights())
                     self.log("Saved global_weights.npy", "INFO")
