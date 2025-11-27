@@ -1,6 +1,10 @@
 """Left control panel - separate module."""
 import tkinter as tk
 from data.datasets import get_dataset_info
+try:
+    from core.config import load_config
+    _cfg=load_config()
+except: _cfg={}
 
 def create_left_panel(root):
     left_panel = tk.Frame(root, bg="#2c3e50", width=260)
@@ -16,7 +20,7 @@ def create_left_panel(root):
         return lbl
 
     add_section_label("NUM CLIENTS")
-    clients_var = tk.StringVar(value="5")
+    clients_var = tk.StringVar(value=str(_cfg.get("clients",5)))
     tk.Spinbox(left_panel, from_=2, to=100, textvariable=clients_var, wrap=True, font=("Arial", 10), width=10).pack(padx=15, fill=tk.X, pady=(0, 5))
 
     add_section_label("ROUNDS")
