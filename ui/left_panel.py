@@ -86,6 +86,10 @@ def create_left_panel(root):
         def _set_lr(v=val): lr_var.set(v); lr_label.config(text=_fmt_lr(v))
         tk.Button(lr_preset, text=txt, command=_set_lr, bg="#34495e", fg="#bdc3c7", font=("Arial", 7), relief=tk.FLAT, padx=6, pady=2).pack(side=tk.LEFT, padx=2)
 
+    dp_var = tk.BooleanVar(value=False)
+    tk.Checkbutton(left_panel, text="DP enabled", variable=dp_var, bg="#2c3e50", fg="white").pack(anchor="w", padx=15)
+    noise_var = tk.DoubleVar(value=0.01)
+    tk.Scale(left_panel, from_=0.001, to=0.1, resolution=0.001, variable=noise_var, orient=tk.HORIZONTAL).pack(fill=tk.X, padx=15)
     add_section_label("CLIENT FRACTION C")
     client_frac_var = tk.DoubleVar(value=1.0)
     tk.Label(left_panel, text="fraction sampled per round", bg="#2c3e50", fg="#7f8c8d", font=("Arial", 7)).pack(padx=15, anchor="w")
@@ -124,6 +128,8 @@ def create_left_panel(root):
         "alpha_var": alpha_var,
         "lr_var": lr_var,
         "client_frac_var": client_frac_var,
+        "dp_var": dp_var,
+        "noise_var": noise_var,
         "start_btn": start_btn,
         "stop_btn": stop_btn,
     }
