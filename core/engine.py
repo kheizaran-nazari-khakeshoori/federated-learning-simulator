@@ -108,6 +108,8 @@ class Engine:
                 cw["status_var"].set("● training")
                 cw["st_lbl"].config(fg="#e67e22")
                 cw["card"].config(bg="#fef9e7")
+            dp_enabled = bool(self.left["dp_var"].get()) if "dp_var" in self.left else False
+            noise_scale = float(self.left["noise_var"].get()) if "noise_var" in self.left else 0.01
             C = float(self.left["client_frac_var"].get()) if "client_frac_var" in self.left else 1.0
             m = max(1, int(len(self.right["client_widgets"]) * C))
             sampled_idx = sorted(random.sample(range(len(self.right["client_widgets"])), m))
