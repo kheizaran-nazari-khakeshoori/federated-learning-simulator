@@ -172,3 +172,7 @@ if __name__ == "__main__":
 # cifar transform pipeline: per-channel mean/std
 cifar_mean = [0.4914,0.4822,0.4465]
 cifar_std = [0.2023,0.1994,0.2010]
+
+def flip_labels(y, n_classes=10):
+    import numpy as np
+    return (n_classes-1 - y)  # simple flip
