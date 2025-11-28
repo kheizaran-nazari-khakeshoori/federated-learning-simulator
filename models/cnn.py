@@ -43,6 +43,9 @@ class SimpleCNN:
         pred = self.predict(X)
         return float(np.mean(pred == y) * 100)
 
+    def clip_grad(self, g, clip=1.0):
+        n=np.linalg.norm(g)
+        return g * min(1, clip/(n+1e-6))
     def train(self, X, y, epochs=1, batch_size=32, verbose=False):
         """SGD with L2 decay 1e-4 to prevent 100% overfit on synthetic."""
         n = X.shape[0]
