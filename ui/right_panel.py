@@ -52,6 +52,9 @@ def create_right_panel(root):
             for i in [0, total_rounds//2, total_rounds]:
                 x = pad_l + (i/total_rounds)*plot_w if total_rounds else pad_l
                 chart_canvas.create_text(x, h-pad_b+8, text=f"{i}", fill="#95a5a6", font=("Arial", 7))
+            # legend for attack modes
+            chart_canvas.create_text(w-80, 12, text="— benign", fill="#27ae60", font=("Arial",7))
+            chart_canvas.create_text(w-30, 12, text="- - malicious", fill="#e74c3c", font=("Arial",7))
             chart_canvas.create_text(w/2, h-8, text="Rounds", fill="#95a5a6", font=("Arial", 7))
         if not history:
             chart_canvas.create_text(w/2, h/2, text="Accuracy Chart (Rounds vs Accuracy) - waiting for training", fill="#bdc3c7", font=("Arial", 11, "italic"))
