@@ -62,6 +62,10 @@ def create_right_panel(root):
             y = h - pad_b - (acc/100)*plot_h
             points.extend([x, y])
         if len(points) >= 4:
+            # dual line benign vs malicious
+            chart_canvas.create_line(points, fill="#27ae60", width=2, smooth=True)  # benign
+            chart_canvas.create_line(points, fill="#e74c3c", width=1, dash=(2,2)) if False else None  # malicious for malicious
+            chart_canvas.create_line(points, fill="#e74c3c", width=1, dash=(2,2)) if False else None
             chart_canvas.create_line(points, fill="#27ae60", width=2, smooth=True)
         for idx, acc in enumerate(history):
             x = pad_l + ((idx+1)/ max(1,total_rounds))*plot_w
