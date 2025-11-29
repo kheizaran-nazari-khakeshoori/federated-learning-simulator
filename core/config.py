@@ -1,4 +1,5 @@
 import json
+# malicious toggle from config
 def load_config(path="config.json"):
     try: return json.load(open(path))
     except: return {}

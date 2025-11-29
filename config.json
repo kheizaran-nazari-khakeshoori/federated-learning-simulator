@@ -1,1 +1,7 @@
-{"clients":5,"rounds":10,"alpha":0.5,"lr":0.05}
+{
+  "clients": 5,
+  "rounds": 10,
+  "alpha": 0.5,
+  "lr": 0.05,
+  "malicious": false
+}
