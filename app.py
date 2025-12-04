@@ -6,7 +6,7 @@ from core.engine import Engine
 
 def main():
     root = tk.Tk()
-    root.title("Federated Learning Simulator")
+    root.title("Federated Learning Simulator v0.1.0")
     root.geometry("1000x600")
     root.minsize(800, 500)
     root.configure(bg="#f0f0f0")
