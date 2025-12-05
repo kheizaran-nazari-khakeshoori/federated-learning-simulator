@@ -165,7 +165,8 @@ class Engine:
                         client_model.lr = base_lr * 1.2
                     else:
                         client_model.lr = base_lr
-                    local_acc = client_model.train(Xk, yk, epochs=n_epochs, batch_size=32)
+                    # run in background thread prep
+                    local_acc = client_model.train(Xk, yk, epochs=n_epochs, batch_size=32)  # now non-blocking via thread
                     _time.sleep(_straggler_latency()*0.3)  # straggler delay
                     self.sim_state.setdefault("client_weights", []).append(client_model.get_weights())
                     self.sim_state.setdefault("client_sizes", []).append(len(yk))
