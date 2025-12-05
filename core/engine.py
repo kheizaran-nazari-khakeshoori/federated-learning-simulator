@@ -1,5 +1,6 @@
 """Simulation engine - separate from GUI. Handles real CNN training + FedAvg/Prox/Adam."""
 import random
+import threading
 import time as _time
 import numpy as np
 from algorithms import get_algorithm
