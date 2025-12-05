@@ -13,7 +13,7 @@ class SimpleCNN:
     def __init__(self, input_dim=784, hidden=128, output=10, lr=0.1, seed=0):
         rng = np.random.RandomState(seed)
         # He init
-        self.W1 = rng.randn(input_dim, hidden).astype(np.float32) * np.sqrt(2./input_dim)
+        self.W1 = rng.randn(input_dim, hidden).astype(np.float16).astype(np.float32)  # float16 save * np.sqrt(2./input_dim)
         self.b1 = np.zeros(hidden, dtype=np.float32)
         self.W2 = rng.randn(hidden, output).astype(np.float32) * np.sqrt(2./hidden)
         self.b2 = np.zeros(output, dtype=np.float32)
