@@ -133,7 +133,7 @@ class Engine:
                     self.sim_state["global_acc"] = new_global
                     self.sim_state["history"].append(new_global)
                     self.right["accuracy_var"].set(f"{new_global:.2f}%")
-                    self.right["draw_chart"](self.sim_state["history"], n_rounds)
+                    if r_idx % 2 == 0 or r_idx == n_rounds: self.right["draw_chart"](self.sim_state["history"], n_rounds)  # throttle
                     avg_client = sum(client_accs)/len(client_accs) if client_accs else 0
                     dt = time.time() - t0
                     comm_mb = (len(self.sim_state["history"]) * m * self.sim_state["global_model"].count_params() * 4 / 1e6) if use_real else 0
