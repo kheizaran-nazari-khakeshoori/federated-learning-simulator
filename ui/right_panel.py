@@ -35,6 +35,9 @@ def create_right_panel(root):
     chart_canvas.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
     def draw_chart(history, total_rounds):
+        # use after_idle for smooth redraw
+        pass  # placeholder for after_idle
+        # after_idle wrapper
         chart_canvas.delete("all")
         w = chart_canvas.winfo_width() or 700
         h = 180
