@@ -51,6 +51,11 @@ def _try_sklearn_mnist():
 
 def _synthetic_dataset(n_train=6000, n_test=1000, n_classes=10, input_dim=784, seed=0):
     """Hard synthetic: closer centroids + higher noise + 5% label noise (no more 100% accuracy)."""
+    import os, pickle
+    cache = f"/tmp/partitions_alpha{alpha}.pkl"
+    if os.path.exists(cache):
+        try: return pickle.load(open(cache,"rb"))
+        except: pass
     rng = np.random.RandomState(seed)
     centroids = rng.randn(n_classes, input_dim) * 1.0  # closer -> harder
     def make_split(n):
@@ -128,6 +133,11 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
       alpha=10   IID-like (balanced)
     Returns: list of (X_k, y_k) per client
     """
+    import os, pickle
+    cache = f"/tmp/partitions_alpha{alpha}.pkl"
+    if os.path.exists(cache):
+        try: return pickle.load(open(cache,"rb"))
+        except: pass
     rng = np.random.RandomState(seed)
     n_classes = len(np.unique(y_train))
     # Dirichlet per class
