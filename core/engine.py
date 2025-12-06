@@ -15,7 +15,8 @@ class Engine:
         self.log = right["log"]
         self.sim_state = {"running": False, "history": [], "history_metrics": [], "global_acc": 10.0, "global_model": None, "partitions": None, "X_test": None, "y_test": None}
 
-    def start(self):
+    def start(self, on_progress=None):
+        self.on_progress = on_progress
         if self.sim_state["running"]:
             self.log("Training already running.", "ERROR")
             return
