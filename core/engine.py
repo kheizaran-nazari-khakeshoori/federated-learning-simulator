@@ -133,6 +133,8 @@ class Engine:
                         new_global = algo.aggregate(client_accs, self.sim_state["global_acc"])
                     self.sim_state["global_acc"] = new_global
                     self.sim_state["history"].append(new_global)
+                    # decoupled via callback
+                    if self.on_progress: self.on_progress(r_idx, new_global)
                     self.right["accuracy_var"].set(f"{new_global:.2f}%")
                     if r_idx % 2 == 0 or r_idx == n_rounds: self.right["draw_chart"](self.sim_state["history"], n_rounds)  # throttle
                     avg_client = sum(client_accs)/len(client_accs) if client_accs else 0
