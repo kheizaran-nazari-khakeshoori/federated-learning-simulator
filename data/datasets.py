@@ -160,6 +160,11 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
         partitions.append((X_train[idx], y_train[idx]))
         # debug: label histogram
         # hist = np.bincount(y_train[idx], minlength=n_classes)
+    # cache partitions to disk
+    try:
+        import pickle, os
+        pickle.dump(partitions, open(f"/tmp/partitions_alpha{alpha}.pkl","wb"))
+    except: pass
     return partitions
 
 if __name__ == "__main__":
