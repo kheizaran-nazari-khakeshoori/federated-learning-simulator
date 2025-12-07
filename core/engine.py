@@ -42,8 +42,9 @@ class Engine:
         use_real = True
         try:
             (X_train, y_train), (X_test, y_test) = get_dataset(dataset)
-            if len(X_train) > 6000:
-                idx = np.random.choice(len(X_train), 6000, replace=False)
+            cap = 3000 if dataset.upper()=="CIFAR-10" else 6000
+            if len(X_train) > cap:
+                idx = np.random.choice(len(X_train), cap, replace=False)
                 X_train, y_train = X_train[idx], y_train[idx]
             alpha = float(self.left["alpha_var"].get())
             lr = float(self.left["lr_var"].get())
