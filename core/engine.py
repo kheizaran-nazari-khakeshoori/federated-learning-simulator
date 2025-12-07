@@ -13,6 +13,7 @@ class Engine:
         self.left = left
         self.right = right
         self.log = right["log"]
+        self.stop_event = threading.Event()
         self.sim_state = {"running": False, "history": [], "history_metrics": [], "global_acc": 10.0, "global_model": None, "partitions": None, "X_test": None, "y_test": None}
 
     def start(self, on_progress=None):
@@ -69,6 +70,7 @@ class Engine:
             lr = float(self.left["lr_var"].get())
             self.sim_state.update({"global_model": None, "partitions": None, "X_test": None, "y_test": None})
 
+        self.stop_event.clear()
         self.sim_state["running"] = True
         self.sim_state["history"] = []
         self.sim_state["global_acc"] = init_acc
@@ -92,7 +94,7 @@ class Engine:
 
         import time
         def run_round(r_idx):
-            if not self.sim_state["running"]:
+            if self.stop_event.is_set() or not self.sim_state["running"]:
                 return
             if r_idx > n_rounds:
                 finish()
@@ -118,7 +120,7 @@ class Engine:
             self.log(f"Sampled {m}/{len(self.right['client_widgets'])} clients: {[i+1 for i in sampled_idx]} (C={C})", "INFO")
             client_accs = []
             def animate_client(pos):
-                if not self.sim_state["running"]:
+                if self.stop_event.is_set() or not self.sim_state["running"]:
                     return
                 if pos >= len(sampled_idx):
                     # all sampled clients done -> aggregate
