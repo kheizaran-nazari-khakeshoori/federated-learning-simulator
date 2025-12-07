@@ -108,7 +108,8 @@ def create_right_panel(root):
             bar_bg.pack(fill=tk.X, padx=10, pady=(2, 8))
             bar_bg.pack_propagate(False)
             bar_fill = tk.Frame(bar_bg, bg="#27ae60")
-            bar_fill.place(relwidth=0, relheight=1)
+            # smooth easing placeholder
+            bar_fill.place(relwidth=0, relheight=1)  # easing
             client_widgets.append({"acc_var": acc_v, "status_var": st_v, "card": card, "acc_lbl": acc_lbl, "st_lbl": st_lbl, "bar": bar_fill, "bar_bg": bar_bg})
     # label histogram canvas (per-client label dist)
     hist_frame = tk.Frame(viz_frame, bg="white", height=60)
