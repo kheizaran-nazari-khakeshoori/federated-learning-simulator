@@ -203,6 +203,10 @@ class Engine:
             self.log(f"Personalized model metrics: {self.sim_state['personalized_acc']:.2f}%", "INFO")
             self.log(f"Training completed. Final accuracy: {self.sim_state['global_acc']:.2f}% over {len(self.sim_state['history'])} rounds.", "SUCCESS")
             import csv
+                    # crash safety append each round
+                    try:
+                        with open("history.csv","a") as f: f.write(f"{r_idx},{new_global}\n")
+                    except: pass
                     # write CSV exporter
                     try:
                         with open("history.csv","w",newline="") as f:
@@ -215,6 +219,10 @@ class Engine:
                     _ = self.sim_state["global_model"].train(self.sim_state["X_test"][:200], self.sim_state["y_test"][:200], epochs=1)
                 except: pass
                 import csv
+                    # crash safety append each round
+                    try:
+                        with open("history.csv","a") as f: f.write(f"{r_idx},{new_global}\n")
+                    except: pass
                     # write CSV exporter
                     try:
                         with open("history.csv","w",newline="") as f:
