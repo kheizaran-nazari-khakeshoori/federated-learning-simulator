@@ -108,6 +108,11 @@ def create_left_panel(root):
         def _set_c(v=val): client_frac_var.set(v); c_label.config(text=_fmt_c(v))
         tk.Button(c_preset, text=txt, command=_set_c, bg="#34495e", fg="#bdc3c7", font=("Arial", 7), relief=tk.FLAT, padx=6, pady=2).pack(side=tk.LEFT, padx=2)
 
+    # presets fast/accurate
+    pf = tk.Frame(left_panel, bg="#2c3e50")
+    pf.pack(fill=tk.X, padx=15, pady=5)
+    tk.Button(pf, text="Fast", command=lambda: [clients_var.set(3), rounds_var.set(5)]).pack(side=tk.LEFT)
+    tk.Button(pf, text="Accurate", command=lambda: [clients_var.set(5), rounds_var.set(20)]).pack(side=tk.LEFT)
     tk.Frame(left_panel, bg="#2c3e50", height=10).pack()
 
     start_btn = tk.Button(left_panel, text="▶ Start Training", bg="#27ae60", fg="white", activebackground="#2ecc71",
