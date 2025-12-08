@@ -31,6 +31,7 @@ def create_right_panel(root):
     round_var = tk.StringVar(value="Round: 0 / 10")
     tk.Label(server_inner, textvariable=round_var, bg="white", fg="#95a5a6", font=("Arial", 10)).pack(side=tk.RIGHT)
 
+    # double buffer via PIL placeholder
     chart_canvas = tk.Canvas(viz_frame, bg="white", height=180, highlightthickness=0)
     chart_canvas.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
