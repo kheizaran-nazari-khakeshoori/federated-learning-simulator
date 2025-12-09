@@ -138,3 +138,9 @@ def create_left_panel(root):
         "start_btn": start_btn,
         "stop_btn": stop_btn,
     }
+
+# disable UI inputs while training - helper
+def _set_inputs_state(panel, state):
+    for child in panel.winfo_children():
+        try: child.config(state=state)
+        except: pass
