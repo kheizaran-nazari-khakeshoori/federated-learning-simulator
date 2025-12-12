@@ -1,7 +1,5 @@
 """Simulation engine - separate from GUI. Handles real CNN training + FedAvg/Prox/Adam."""
 import random
-import threading
-import time as _time
 import numpy as np
 from algorithms import get_algorithm
 from data.datasets import get_dataset, partition_non_iid, _is_real_available
@@ -13,11 +11,9 @@ class Engine:
         self.left = left
         self.right = right
         self.log = right["log"]
-        self.stop_event = threading.Event()
-        self.sim_state = {"running": False, "history": [], "history_metrics": [], "global_acc": 10.0, "global_model": None, "partitions": None, "X_test": None, "y_test": None}
+        self.sim_state = {"running": False, "history": [], "global_acc": 10.0, "global_model": None, "partitions": None, "X_test": None, "y_test": None}
 
-    def start(self, on_progress=None):
-        self.on_progress = on_progress
+    def start(self):
         if self.sim_state["running"]:
             self.log("Training already running.", "ERROR")
             return
@@ -42,15 +38,14 @@ class Engine:
         use_real = True
         try:
             (X_train, y_train), (X_test, y_test) = get_dataset(dataset)
-            cap = 3000 if dataset.upper()=="CIFAR-10" else 6000
-            if len(X_train) > cap:
-                idx = np.random.choice(len(X_train), cap, replace=False)
+            if len(X_train) > 6000:
+                idx = np.random.choice(len(X_train), 6000, replace=False)
                 X_train, y_train = X_train[idx], y_train[idx]
             alpha = float(self.left["alpha_var"].get())
             lr = float(self.left["lr_var"].get())
             input_dim = X_train.shape[1]
             partitions = partition_non_iid(X_train, y_train, n_clients, alpha=alpha, seed=42)
-            global_model = SimpleCNN(input_dim=input_dim, hidden=128, output=len(np.unique(y_train)) # shapes from dataset, lr=lr)
+            global_model = SimpleCNN(input_dim=input_dim, hidden=128, output=len(np.unique(y_train)), lr=lr)
             self.log(f"Model SimpleCNN params: {global_model.count_params()} (input {input_dim} ->128->10)", "INFO")
             init_acc = global_model.evaluate(X_test, y_test)
             self.sim_state.update({"global_model": global_model, "partitions": partitions, "X_test": X_test, "y_test": y_test})
@@ -71,7 +66,6 @@ class Engine:
             lr = float(self.left["lr_var"].get())
             self.sim_state.update({"global_model": None, "partitions": None, "X_test": None, "y_test": None})
 
-        self.stop_event.clear()
         self.sim_state["running"] = True
         self.sim_state["history"] = []
         self.sim_state["global_acc"] = init_acc
@@ -95,7 +89,7 @@ class Engine:
 
         import time
         def run_round(r_idx):
-            if self.stop_event.is_set() or not self.sim_state["running"]:
+            if not self.sim_state["running"]:
                 return
             if r_idx > n_rounds:
                 finish()
@@ -113,15 +107,13 @@ class Engine:
                 cw["status_var"].set("● training")
                 cw["st_lbl"].config(fg="#e67e22")
                 cw["card"].config(bg="#fef9e7")
-            dp_enabled = bool(self.left["dp_var"].get()) if "dp_var" in self.left else False
-            noise_scale = float(self.left["noise_var"].get()) if "noise_var" in self.left else 0.01
             C = float(self.left["client_frac_var"].get()) if "client_frac_var" in self.left else 1.0
             m = max(1, int(len(self.right["client_widgets"]) * C))
             sampled_idx = sorted(random.sample(range(len(self.right["client_widgets"])), m))
             self.log(f"Sampled {m}/{len(self.right['client_widgets'])} clients: {[i+1 for i in sampled_idx]} (C={C})", "INFO")
             client_accs = []
             def animate_client(pos):
-                if self.stop_event.is_set() or not self.sim_state["running"]:
+                if not self.sim_state["running"]:
                     return
                 if pos >= len(sampled_idx):
                     # all sampled clients done -> aggregate
@@ -136,10 +128,8 @@ class Engine:
                         new_global = algo.aggregate(client_accs, self.sim_state["global_acc"])
                     self.sim_state["global_acc"] = new_global
                     self.sim_state["history"].append(new_global)
-                    # decoupled via callback
-                    if self.on_progress: self.on_progress(r_idx, new_global)
                     self.right["accuracy_var"].set(f"{new_global:.2f}%")
-                    if r_idx % 2 == 0 or r_idx == n_rounds: self.right["draw_chart"](self.sim_state["history"], n_rounds)  # throttle
+                    self.right["draw_chart"](self.sim_state["history"], n_rounds)
                     avg_client = sum(client_accs)/len(client_accs) if client_accs else 0
                     dt = time.time() - t0
                     comm_mb = (len(self.sim_state["history"]) * m * self.sim_state["global_model"].count_params() * 4 / 1e6) if use_real else 0
@@ -171,10 +161,7 @@ class Engine:
                         client_model.lr = base_lr * 1.2
                     else:
                         client_model.lr = base_lr
-                    # run in background thread prep
-                    bsize = max(16, len(yk)//10)  # auto batch
-                    local_acc = client_model.train(Xk, yk, epochs=n_epochs, batch_size=bsize)  # now non-blocking via thread
-                    _time.sleep(_straggler_latency()*0.3)  # straggler delay
+                    local_acc = client_model.train(Xk, yk, epochs=n_epochs, batch_size=32)
                     self.sim_state.setdefault("client_weights", []).append(client_model.get_weights())
                     self.sim_state.setdefault("client_sizes", []).append(len(yk))
                 else:
@@ -199,37 +186,8 @@ class Engine:
             self.left["start_btn"].config(state="normal")
             self.right["status_var"].set("Completed")
             self.right["status_lbl"].config(bg="#27ae60", fg="white")
-            self.sim_state["personalized_acc"] = self.sim_state["global_acc"] * 0.98  # placeholder personalized metric
-            self.log(f"Personalized model metrics: {self.sim_state['personalized_acc']:.2f}%", "INFO")
             self.log(f"Training completed. Final accuracy: {self.sim_state['global_acc']:.2f}% over {len(self.sim_state['history'])} rounds.", "SUCCESS")
-            import csv
-                    # crash safety append each round
-                    try:
-                        with open("history.csv","a") as f: f.write(f"{r_idx},{new_global}\n")
-                    except: pass
-                    # write CSV exporter
-                    try:
-                        with open("history.csv","w",newline="") as f:
-                            w=csv.writer(f); w.writerow(["round","accuracy"])
-                            [w.writerow([i+1,a]) for i,a in enumerate(self.sim_state["history"])]
-                    except: pass
-                    if self.sim_state["global_model"] is not None:
-                # local finetuning step post-eval (1 epoch on test subset)
-                try:
-                    _ = self.sim_state["global_model"].train(self.sim_state["X_test"][:200], self.sim_state["y_test"][:200], epochs=1)
-                except: pass
-                import csv
-                    # crash safety append each round
-                    try:
-                        with open("history.csv","a") as f: f.write(f"{r_idx},{new_global}\n")
-                    except: pass
-                    # write CSV exporter
-                    try:
-                        with open("history.csv","w",newline="") as f:
-                            w=csv.writer(f); w.writerow(["round","accuracy"])
-                            [w.writerow([i+1,a]) for i,a in enumerate(self.sim_state["history"])]
-                    except: pass
-                    if self.sim_state["global_model"] is not None:
+            if self.sim_state["global_model"] is not None:
                 try:
                     np.save("global_weights.npy", self.sim_state["global_model"].get_weights())
                     self.log("Saved global_weights.npy", "INFO")
@@ -259,6 +217,3 @@ class Engine:
                     cw["st_lbl"].config(fg="#e74c3c")
         else:
             self.log("No training to stop.", "INFO")
-
-# artificial client latency generator
-def _straggler_latency(): return random.uniform(0.1,0.6)
