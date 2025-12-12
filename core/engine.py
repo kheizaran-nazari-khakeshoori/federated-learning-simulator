@@ -97,6 +97,10 @@ class Engine:
             t0 = time.time()
             self.right["round_var"].set(f"Round: {r_idx} / {n_rounds}")
             self.log(f"--- Round {r_idx}/{n_rounds} ---", "ROUND")
+            C = float(self.left["client_frac_var"].get()) if "client_frac_var" in self.left else 1.0
+            m = max(1, int(len(self.right["client_widgets"]) * C))
+            sampled_idx = sorted(random.sample(range(len(self.right["client_widgets"])), m))
+            self.log(f"Sampled {m}/{len(self.right['client_widgets'])} clients: {[i+1 for i in sampled_idx]} (C={C})", "INFO")
             for cw in self.right["client_widgets"]:
                 cw["bar"].place(relwidth=0, relheight=1)
                 cw["status_var"].set("● idle")
@@ -107,10 +111,6 @@ class Engine:
                 cw["status_var"].set("● training")
                 cw["st_lbl"].config(fg="#e67e22")
                 cw["card"].config(bg="#fef9e7")
-            C = float(self.left["client_frac_var"].get()) if "client_frac_var" in self.left else 1.0
-            m = max(1, int(len(self.right["client_widgets"]) * C))
-            sampled_idx = sorted(random.sample(range(len(self.right["client_widgets"])), m))
-            self.log(f"Sampled {m}/{len(self.right['client_widgets'])} clients: {[i+1 for i in sampled_idx]} (C={C})", "INFO")
             client_accs = []
             def animate_client(pos):
                 if not self.sim_state["running"]:
