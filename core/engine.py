@@ -88,6 +88,9 @@ class Engine:
         self.log(f"Loaded model: algorithms/{agg.lower()}.py + models/cnn.py lr={lr:.3f}", "INFO")
 
         import time
+        # background thread for training
+        def _train_in_thread(target, *a):
+            import threading; threading.Thread(target=target, args=a, daemon=True).start()
         def run_round(r_idx):
             if not self.sim_state["running"]:
                 return
