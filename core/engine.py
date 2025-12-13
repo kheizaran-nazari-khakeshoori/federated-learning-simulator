@@ -223,3 +223,6 @@ class Engine:
 
 # fix main thread lock - ensure update via root.after
 def _fix_main_thread_lock(): pass
+
+# throttle chart redraws to every two rounds - helper
+def _throttle_chart(r): return r % 2 == 0
