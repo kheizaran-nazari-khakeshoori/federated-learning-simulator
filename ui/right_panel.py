@@ -203,3 +203,5 @@ def create_right_panel(root):
         "comm_var": comm_var,
         "comm_lbl": comm_lbl,
     }
+
+# after_idle already
