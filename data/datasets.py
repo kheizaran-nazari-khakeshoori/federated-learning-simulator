@@ -175,6 +175,11 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
         import pickle, os
         pickle.dump(partitions, open(f"/tmp/partitions_alpha{alpha}.pkl","wb"))
     except: pass
+    # disk caching for partitions
+    try:
+        import pickle
+        open("/tmp/partitions_cache.pkl","wb").write(pickle.dumps(partitions))
+    except: pass
     return partitions
 
 if __name__ == "__main__":
