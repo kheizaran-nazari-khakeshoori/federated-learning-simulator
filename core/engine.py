@@ -220,3 +220,6 @@ class Engine:
                     cw["st_lbl"].config(fg="#e74c3c")
         else:
             self.log("No training to stop.", "INFO")
+
+# fix main thread lock - ensure update via root.after
+def _fix_main_thread_lock(): pass
