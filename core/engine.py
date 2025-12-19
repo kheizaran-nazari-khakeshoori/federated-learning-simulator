@@ -147,6 +147,7 @@ class Engine:
                         return
                     # LR decay per round for stability
                     if use_real and self.sim_state["global_model"] is not None:
+                        # per-round decay factor 0.995
                         self.sim_state["global_model"].lr *= 0.995
                     for cw in self.right["client_widgets"]:
                         cw["card"].config(bg="#f8f9fa")
