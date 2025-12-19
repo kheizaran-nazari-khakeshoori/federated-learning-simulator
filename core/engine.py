@@ -146,6 +146,9 @@ class Engine:
                         self.log("Plateau detected (last 3 rounds <0.5% gain) - consider higher LR or more clients", "INFO")
                     if len(self.sim_state["history"]) >= 5 and max(self.sim_state["history"][-5:]) - min(self.sim_state["history"][-5:]) < 0.3:
                         self.log("Early stopping - no improvement for 5 rounds", "INFO")
+                        if hasattr(self, '_best_weights') and self._best_weights is not None:
+                            self.sim_state["global_model"].set_weights(self._best_weights)
+                            self.log("Restored best weight snapshot", "INFO")
                         finish()
                         return
                     # LR decay per round for stability
