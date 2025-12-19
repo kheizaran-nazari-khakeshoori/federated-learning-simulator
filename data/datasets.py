@@ -200,3 +200,6 @@ cifar_std = [0.2023,0.1994,0.2010]
 def flip_labels(y, n_classes=10):
     import numpy as np
     return (n_classes-1 - y)  # simple flip
+
+# per-channel mean/std for cifar dataset - verified
+cifar_per_channel = True
