@@ -62,6 +62,8 @@ class SimpleCNN:
                 y_onehot = np.zeros_like(probs)
                 y_onehot[np.arange(len(yb)), yb] = 1
                 dlogits = (probs - y_onehot) / len(yb)
+                # nan loss check
+                if np.isnan(dlogits).any(): continue
                 dW2 = h.T @ dlogits + wd * self.W2
                 db2 = dlogits.sum(axis=0)
                 dh = dlogits @ self.W2.T
