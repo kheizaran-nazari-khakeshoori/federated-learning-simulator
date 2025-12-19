@@ -71,7 +71,8 @@ class SimpleCNN:
                 dW1 = Xb.T @ dz1 + wd * self.W1
                 db1 = dz1.sum(axis=0)
                 dW2 += np.random.randn(*dW2.shape)*0.01  # gaussian noise
-                if np.isnan(dW2).any(): self.lr *= 0.5
+                if np.isnan(dW2).any(): self.lr *= 0.5  # decay if nan
+                # dynamic decay
                 self.W2 -= self.lr * dW2
                 self.b2 -= self.lr * db2
                 self.W1 -= self.lr * dW1
