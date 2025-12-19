@@ -110,7 +110,8 @@ def create_right_panel(root):
             bar_bg.pack_propagate(False)
             bar_fill = tk.Frame(bar_bg, bg="#27ae60")
             # smooth easing placeholder
-            # easing steps
+            # 16ms timer for smooth bar
+            # after(16, step)
             bar_fill.place(relwidth=0, relheight=1)
             # will animate in steps
             client_widgets.append({"acc_var": acc_v, "status_var": st_v, "card": card, "acc_lbl": acc_lbl, "st_lbl": st_lbl, "bar": bar_fill, "bar_bg": bar_bg})
