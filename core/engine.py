@@ -229,3 +229,6 @@ def _fix_main_thread_lock(): pass
 def _throttle_chart(r): return r % 2 == 0
 
 # check stop event inside epoch
+
+# artificial random delay for straggler - second helper
+def _straggler_delay2(): return __import__('random').uniform(0.02,0.15)
