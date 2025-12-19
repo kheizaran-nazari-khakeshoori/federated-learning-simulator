@@ -226,3 +226,5 @@ def _fix_main_thread_lock(): pass
 
 # throttle chart redraws to every two rounds - helper
 def _throttle_chart(r): return r % 2 == 0
+
+# check stop event inside epoch
