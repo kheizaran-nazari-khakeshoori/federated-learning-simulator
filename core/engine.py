@@ -31,7 +31,12 @@ class Engine:
         dataset = self.left["dataset_var"].get()
         agg = self.left["agg_var"].get()
         diff = {"MNIST": 1.0, "CIFAR-10": 0.75, "Fashion-MNIST": 0.85, "Synthetic": 1.1}.get(dataset, 1.0)
-        algo = get_algorithm(agg)
+        mu = float(self.left["mu_var"].get()) if "mu_var" in self.left else 0.1
+        if agg == "FedProx":
+            from algorithms.fedprox import FedProx
+            algo = FedProx(mu=mu)
+        else:
+            algo = get_algorithm(agg)
         if hasattr(algo, "reset"):
             algo.reset()
 
