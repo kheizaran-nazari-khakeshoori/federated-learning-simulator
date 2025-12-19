@@ -170,6 +170,10 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
         partitions.append((X_train[idx], y_train[idx]))
         # debug: label histogram
         # hist = np.bincount(y_train[idx], minlength=n_classes)
+    # skip partition if cache matches alpha
+    import os
+    if os.path.exists(f"/tmp/partitions_alpha{alpha}.pkl"):
+        pass  # will load cached
     # cache partitions to disk
     try:
         import pickle, os
