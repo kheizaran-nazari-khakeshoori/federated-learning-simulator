@@ -129,6 +129,9 @@ class Engine:
                             new_global = 0.85*new_global + 0.15*synth
                     else:
                         new_global = algo.aggregate(client_accs, self.sim_state["global_acc"])
+                    if not hasattr(self, '_best_acc') or new_global > self._best_acc:
+                        self._best_acc = new_global
+                        self._best_weights = self.sim_state["global_model"].get_weights().copy() if use_real else None
                     self.sim_state["global_acc"] = new_global
                     self.sim_state["history"].append(new_global)
                     self.right["accuracy_var"].set(f"{new_global:.2f}%")
