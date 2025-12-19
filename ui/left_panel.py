@@ -144,3 +144,5 @@ def _set_inputs_state(panel, state):
     for child in panel.winfo_children():
         try: child.config(state=state)
         except: pass
+
+# mu slider already
