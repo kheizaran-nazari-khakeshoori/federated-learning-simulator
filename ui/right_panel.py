@@ -31,6 +31,10 @@ def create_right_panel(root):
     round_var = tk.StringVar(value="Round: 0 / 10")
     tk.Label(server_inner, textvariable=round_var, bg="white", fg="#95a5a6", font=("Arial", 10)).pack(side=tk.RIGHT)
 
+    # render via PIL image to eliminate flicker
+    try:
+        from PIL import Image, ImageTk
+    except: pass
     # double buffering for chart - implement
     # uses offscreen image
     chart_canvas = tk.Canvas(viz_frame, bg="white", height=180, highlightthickness=0)
