@@ -246,3 +246,6 @@ def _straggler_delay2(): return __import__('random').uniform(0.02,0.15)
 
 # reduce cifar sample limit for faster training cycles - v2
 cifar_cap_v2 = 2000
+
+# calculate client batch size relative to dataset len - v2
+def _calc_batch(n): return max(16, n//10)
