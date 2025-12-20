@@ -43,6 +43,7 @@ class SimpleCNN:
         pred = self.predict(X)
         return float(np.mean(pred == y) * 100)
 
+    # gradient clipping for local updates
     def clip_grad(self, g, clip=1.0):
         n=np.linalg.norm(g)
         return g * min(1, clip/(n+1e-6))
