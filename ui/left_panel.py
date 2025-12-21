@@ -89,6 +89,7 @@ def create_left_panel(root):
     # DP noise toggle
     dp_var = tk.BooleanVar(value=False)
     tk.Checkbutton(left_panel, text="DP enabled", variable=dp_var, bg="#2c3e50", fg="white").pack(anchor="w", padx=15)
+    epsilon_var = tk.DoubleVar(value=1.0)  # epsilon slider
     noise_var = tk.DoubleVar(value=0.01)
     tk.Scale(left_panel, from_=0.001, to=0.1, resolution=0.001, variable=noise_var, orient=tk.HORIZONTAL).pack(fill=tk.X, padx=15)
     add_section_label("CLIENT FRACTION C")
@@ -136,6 +137,7 @@ def create_left_panel(root):
         "client_frac_var": client_frac_var,
         "dp_var": dp_var,
         "noise_var": noise_var,
+        "epsilon_var": epsilon_var,
         "start_btn": start_btn,
         "stop_btn": stop_btn,
     }
