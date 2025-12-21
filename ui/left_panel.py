@@ -86,6 +86,7 @@ def create_left_panel(root):
         def _set_lr(v=val): lr_var.set(v); lr_label.config(text=_fmt_lr(v))
         tk.Button(lr_preset, text=txt, command=_set_lr, bg="#34495e", fg="#bdc3c7", font=("Arial", 7), relief=tk.FLAT, padx=6, pady=2).pack(side=tk.LEFT, padx=2)
 
+    # DP noise toggle
     dp_var = tk.BooleanVar(value=False)
     tk.Checkbutton(left_panel, text="DP enabled", variable=dp_var, bg="#2c3e50", fg="white").pack(anchor="w", padx=15)
     noise_var = tk.DoubleVar(value=0.01)
