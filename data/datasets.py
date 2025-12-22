@@ -197,6 +197,7 @@ if __name__ == "__main__":
 cifar_mean = [0.4914,0.4822,0.4465]
 cifar_std = [0.2023,0.1994,0.2010]
 
+# option to corrupt labels for malicious
 def flip_labels(y, n_classes=10):
     import numpy as np
     return (n_classes-1 - y)  # simple flip
