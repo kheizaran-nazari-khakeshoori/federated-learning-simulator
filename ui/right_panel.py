@@ -13,6 +13,7 @@ def create_right_panel(root):
     status_var = tk.StringVar(value="Idle")
     status_lbl = tk.Label(header, textvariable=status_var, bg="#f1c40f", fg="#2c3e50", font=("Arial", 9, "bold"), padx=10, pady=4)
     status_lbl.pack(side=tk.RIGHT, padx=15)
+    time_var = tk.StringVar(value="eta --")
     comm_var = tk.StringVar(value="comm 0.0MB")
     comm_lbl = tk.Label(header, textvariable=comm_var, bg="white", fg="#95a5a6", font=("Arial", 8))
     comm_lbl.pack(side=tk.RIGHT, padx=10)
@@ -209,6 +210,7 @@ def create_right_panel(root):
         "log_text": log_text,
         "autoscroll_var": autoscroll_var,
         "comm_var": comm_var,
+        "time_var": time_var,
         "comm_lbl": comm_lbl,
     }
 
