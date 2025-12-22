@@ -7,3 +7,5 @@ class MockTk:
 def test_single_round():
     from core.engine import Engine
     assert Engine is not None
+
+# mock tk helper for headless
