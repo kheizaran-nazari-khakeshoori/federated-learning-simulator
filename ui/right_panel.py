@@ -215,3 +215,6 @@ def create_right_panel(root):
     }
 
 # after_idle already
+
+# support dual line plotting for benign vs malicious acc - v2
+dual_plot_enabled = True
