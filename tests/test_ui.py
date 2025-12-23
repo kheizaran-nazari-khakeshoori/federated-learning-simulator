@@ -12,3 +12,11 @@ def test_left_vars():
     left = create_left_panel(root)
     assert "clients_var" in left and "alpha_var" in left
     root.destroy()
+
+def test_left_state_vars():
+    import tkinter as tk
+    root=tk.Tk(); root.withdraw()
+    from ui.left_panel import create_left_panel
+    left=create_left_panel(root)
+    assert "clients_var" in left
+    root.destroy()
