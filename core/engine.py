@@ -252,3 +252,6 @@ def _calc_batch(n): return max(16, n//10)
 
 # add local finetuning step for personalizing models - v2
 finetune_enabled = True
+
+# track personalized model metrics separately - v2
+personalized_tracked = True
