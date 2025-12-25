@@ -128,6 +128,7 @@ def create_right_panel(root):
         hist_canvas.delete("all")
         # hist_bars per client placeholder
         hist_canvas.create_text(150,25,text="label histogram per client",fill="#bdc3c7",font=("Arial",8))
+    # partition histogram canvas
     hist_canvas = tk.Canvas(hist_frame, bg="white", height=50, highlightthickness=0)
     hist_canvas.pack(fill=tk.BOTH, expand=True)
     rebuild_clients(5)
