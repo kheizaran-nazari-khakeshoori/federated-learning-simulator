@@ -1,2 +1,6 @@
 run:
 	python3 app.py
+test:
+	pytest -v
+lint:
+	flake8 .
