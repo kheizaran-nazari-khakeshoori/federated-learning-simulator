@@ -5,3 +5,5 @@ def load_config(path="config.json"):
     except: return {}
 def save_config(d, path="config.json"):
     json.dump(d, open(path,"w"), indent=2)
+
+# json config reader and writer helper
