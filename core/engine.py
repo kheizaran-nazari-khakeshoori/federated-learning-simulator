@@ -201,6 +201,13 @@ class Engine:
             self.left["start_btn"].config(state="normal")
             self.right["status_var"].set("Completed")
             self.right["status_lbl"].config(bg="#27ae60", fg="white")
+            # compute confusion matrix after final round
+            try:
+                from models.cnn import confusion_matrix
+                y_pred = self.sim_state["global_model"].predict(self.sim_state["X_test"])
+                cm = confusion_matrix(self.sim_state["y_test"], y_pred)
+                self.log(f"Confusion matrix computed {cm.shape}", "INFO")
+            except: pass
             self.log(f"Training completed. Final accuracy: {self.sim_state['global_acc']:.2f}% over {len(self.sim_state['history'])} rounds.", "SUCCESS")
             if self.sim_state["global_model"] is not None:
                 try:
