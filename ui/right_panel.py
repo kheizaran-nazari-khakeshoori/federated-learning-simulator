@@ -194,6 +194,7 @@ def create_right_panel(root):
     confusion_frame.pack(fill=tk.X, pady=5)
     confusion_grid = tk.Canvas(confusion_frame, bg="white", height=70, highlightthickness=0)
     confusion_grid.pack(fill=tk.BOTH, expand=True)
+    # confusion matrix overlay
     confusion_grid.create_text(200,35,text="confusion matrix 10x10",fill="#bdc3c7",font=("Arial",8))
     log("Simulator ready. Configure left panel and press Start.", "INFO")
     log("Tip: Logs will show each round & client update here.", "INFO")
