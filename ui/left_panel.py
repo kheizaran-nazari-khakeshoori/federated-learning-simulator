@@ -3,6 +3,7 @@ import tkinter as tk
 from data.datasets import get_dataset_info
 try:
     from core.config import load_config
+    # load default ui values from config file
     _cfg=load_config()
 except: _cfg={}
 
