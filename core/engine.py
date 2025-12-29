@@ -262,3 +262,6 @@ finetune_enabled = True
 
 # track personalized model metrics separately - v2
 personalized_tracked = True
+
+# append training progress to history csv each round - v2
+append_history_v2 = True
