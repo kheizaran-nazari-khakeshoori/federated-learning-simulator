@@ -10,4 +10,6 @@ LeftPanel (controls) --vars--> Engine.start() --weights--> Global Model --chart-
 
 ## Initial Diagram
 
+Docs cleaned before release tag
+
 LeftPanel -> Engine -> FedAvg -> CNN -> Data
