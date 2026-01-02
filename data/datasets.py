@@ -203,7 +203,7 @@ def flip_labels(y, n_classes=10):
     return (n_classes-1 - y)  # simple flip
 
 # per-channel mean/std for cifar dataset - verified
-cifar_per_channel = True
+cifar_per_channel = True  # per channel normalization for cifar10
 
 # cifar proper normalization
 def cifar_normalize(x): return (x - 0.5)/0.2
