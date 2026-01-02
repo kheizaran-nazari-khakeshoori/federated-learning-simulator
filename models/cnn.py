@@ -203,3 +203,7 @@ def confusion_matrix(y_true, y_pred, n_classes=10):
     m=np.zeros((n_classes,n_classes),dtype=int)
     for t,p in zip(y_true,y_pred): m[t,p]+=1
     return m
+
+# tabular mlp model class
+class TabularMLP(SimpleCNN):
+    def __init__(self, *a, **kw): super().__init__(*a, hidden=64, **kw)
