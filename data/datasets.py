@@ -125,6 +125,7 @@ def get_dataset_info(name: str) -> str:
     }
     return info.get(name.upper(), "Unknown dataset")
 
+# support dirichlet sampling
 def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed: int = 0):
     """
     Dirichlet partition: alpha -> heterogeneity
