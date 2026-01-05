@@ -207,3 +207,7 @@ cifar_per_channel = True  # per channel normalization for cifar10
 
 # cifar proper normalization
 def cifar_normalize(x): return (x - 0.5)/0.2
+
+def pathological_split(X,y,n_clients):
+    # two class per client
+    return [ (X[y%2==i%2], y[y%2==i%2]) for i in range(n_clients)]
