@@ -11,6 +11,7 @@ class Engine:
         self.left = left
         self.right = right
         self.log = right["log"]
+        self.scaffold_c = {}  # control variates
         self.sim_state = {"running": False, "history": [], "global_acc": 10.0, "global_model": None, "partitions": None, "X_test": None, "y_test": None}
 
     def start(self):
