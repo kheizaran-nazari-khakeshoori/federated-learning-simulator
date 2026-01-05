@@ -16,7 +16,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         import torch
         mapping = {
             "MNIST": torchvision.datasets.MNIST,
-            "FASHION-MNIST": torchvision.datasets.FashionMNIST,
+            "FASHION-MNIST  # fixed loader transforms": torchvision.datasets.FashionMNIST,
             "CIFAR-10": torchvision.datasets.CIFAR10,
         }
         cls = mapping.get(dataset_name.upper())
@@ -80,7 +80,7 @@ def _is_real_available(name: str, root: str = "./data") -> bool:
     name = name.upper()
     if name == "MNIST":
         return os.path.exists(os.path.join(root, "MNIST", "raw", "train-images-idx3-ubyte"))
-    if name == "FASHION-MNIST":
+    if name == "FASHION-MNIST  # fixed loader transforms":
         return os.path.exists(os.path.join(root, "FashionMNIST", "raw", "train-images-idx3-ubyte"))
     if name == "CIFAR-10":
         return os.path.exists(os.path.join(root, "cifar-10-batches-py", "data_batch_1"))
@@ -119,7 +119,7 @@ def get_dataset_info(name: str) -> str:
     """Return short description for GUI tooltip."""
     info = {
         "MNIST": "MNIST 70k 28x28 grayscale digits (10 classes)",
-        "FASHION-MNIST": "Fashion-MNIST 70k 28x28 fashion items",
+        "FASHION-MNIST  # fixed loader transforms": "Fashion-MNIST 70k 28x28 fashion items",
         "CIFAR-10": "CIFAR-10 60k 32x32 color images",
         "SYNTHETIC": "Synthetic hard Gaussians (offline, 5% label noise)",
     }
