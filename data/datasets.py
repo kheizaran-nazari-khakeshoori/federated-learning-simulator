@@ -212,3 +212,6 @@ def cifar_normalize(x): return (x - 0.5)/0.2
 def pathological_split(X,y,n_clients):
     # two class per client
     return [ (X[y%2==i%2], y[y%2==i%2]) for i in range(n_clients)]
+
+# label flipping attack for malicious subset
+def malicious_flip(y): return 9-y
