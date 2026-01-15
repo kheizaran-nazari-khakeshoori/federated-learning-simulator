@@ -1,0 +1,3 @@
+import numpy as np
+def add_patch(x):
+    x[:3,:3]=1; return x
