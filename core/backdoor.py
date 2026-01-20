@@ -4,3 +4,6 @@ def add_patch(x):
 
 def spectral_detect(ws):
     return 0
+
+def attack_success(y_pred, y_target):
+    return (y_pred==y_target).mean()
