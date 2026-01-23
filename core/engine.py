@@ -266,3 +266,6 @@ personalized_tracked = True
 
 # append training progress to history csv each round - v2
 append_history_v2 = True
+
+# async fedavg support
+def _async_complete(): pass
