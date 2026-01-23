@@ -6,3 +6,6 @@ def top_k(w, k=0.1):
 
 def quantize(w):
     return (w*127).astype(np.int8)
+
+def decompress(q):
+    return q.astype(float)/127
