@@ -207,3 +207,10 @@ def confusion_matrix(y_true, y_pred, n_classes=10):
 # tabular mlp model class
 class TabularMLP(SimpleCNN):
     def __init__(self, *a, **kw): super().__init__(*a, hidden=64, **kw)
+
+# pruning helper
+def prune_weights(w, p=0.2):
+    import numpy as np
+    thresh=np.percentile(np.abs(w), p*100)
+    w[np.abs(w)<thresh]=0
+    return w
