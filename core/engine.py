@@ -269,3 +269,6 @@ append_history_v2 = True
 
 # async fedavg support
 def _async_complete(): pass
+
+# async client update buffer - v2
+async_buffer_v2 = []
