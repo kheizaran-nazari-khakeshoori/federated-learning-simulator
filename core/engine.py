@@ -1,5 +1,9 @@
 """Simulation engine - separate from GUI. Handles real CNN training + FedAvg/Prox/Adam."""
 import random
+try:
+    import wandb
+    wandb.init(project="fl-sim")
+except: pass
 import numpy as np
 from algorithms import get_algorithm
 from data.datasets import get_dataset, partition_non_iid, _is_real_available
