@@ -93,6 +93,8 @@ def create_left_panel(root):
     epsilon_var = tk.DoubleVar(value=1.0)  # epsilon slider
     noise_var = tk.DoubleVar(value=0.01)
     tk.Scale(left_panel, from_=0.001, to=0.1, resolution=0.001, variable=noise_var, orient=tk.HORIZONTAL).pack(fill=tk.X, padx=15)
+    wandb_var = tk.BooleanVar(value=False)
+    tk.Checkbutton(left_panel, text="WandB", variable=wandb_var).pack()
     add_section_label("CLIENT FRACTION C")
     client_frac_var = tk.DoubleVar(value=1.0)
     tk.Label(left_panel, text="fraction sampled per round", bg="#2c3e50", fg="#7f8c8d", font=("Arial", 7)).pack(padx=15, anchor="w")
@@ -136,6 +138,7 @@ def create_left_panel(root):
         "alpha_var": alpha_var,
         "lr_var": lr_var,
         "client_frac_var": client_frac_var,
+        "wandb_var": wandb_var,
         "dp_var": dp_var,
         "noise_var": noise_var,
         "epsilon_var": epsilon_var,
