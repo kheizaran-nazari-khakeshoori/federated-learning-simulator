@@ -1,0 +1,9 @@
+name: nightly
+on:
+  schedule:
+    - cron: "0 0 * * *"
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - run: python benchmark.py
