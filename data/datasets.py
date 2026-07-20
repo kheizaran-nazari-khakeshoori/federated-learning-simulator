@@ -108,7 +108,7 @@ def get_dataset_info(name: str) -> str:
     """Return short description for GUI tooltip."""
     info = {
         "MNIST": "MNIST 70k 28x28 grayscale digits (10 classes)",
-        "FASHION-MNIST  # fixed loader transforms": "Fashion-MNIST 70k 28x28 fashion items",
+        "FASHION-MNIST": "Fashion-MNIST 70k 28x28 fashion items",
         "CIFAR-10": "CIFAR-10 60k 32x32 color images",
         "SYNTHETIC": "Synthetic hard Gaussians (offline, 5% label noise)",
     }
