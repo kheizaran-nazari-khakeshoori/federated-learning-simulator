@@ -28,7 +28,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
             X = ds.data.numpy() if hasattr(ds.data, "numpy") else np.array(ds.data)
             y = ds.targets.numpy() if hasattr(ds.targets, "numpy") else np.array(ds.targets)
             X = X.astype(np.float32) / 255.0
-            if X.ndim == 3:  # (N,28,28)
+            if X.ndim == 3:
                 X = X.reshape(X.shape[0], -1)
             elif X.ndim == 4:
                 X = X.reshape(X.shape[0], -1)
@@ -44,7 +44,6 @@ def _try_sklearn_mnist():
         mnist = fetch_openml('mnist_784', version=1, as_frame=False, parser='auto')
         X = mnist.data.astype(np.float32) / 255.0
         y = mnist.target.astype(np.int64)
-        # 60k train, 10k test
         return (X[:60000], y[:60000]), (X[60000:], y[60000:])
     except Exception:
         return None
@@ -52,14 +51,13 @@ def _try_sklearn_mnist():
 def _synthetic_dataset(n_train=6000, n_test=1000, n_classes=10, input_dim=784, seed=0):
     """Hard synthetic: closer centroids + higher noise + 5% label noise (no more 100% accuracy)."""
     rng = np.random.RandomState(seed)
-    centroids = rng.randn(n_classes, input_dim) * 1.0  # closer -> harder
+    centroids = rng.randn(n_classes, input_dim) * 1.0
     def make_split(n):
         X = np.zeros((n, input_dim), dtype=np.float32)
         y = rng.randint(0, n_classes, size=n)
         for i in range(n):
-            X[i] = centroids[y[i]] + rng.randn(input_dim) * 1.4  # more noise
+            X[i] = centroids[y[i]] + rng.randn(input_dim) * 1.4
         X = 1 / (1 + np.exp(-X * 0.5))
-        # 5% label noise -> prevents 100% ceiling
         flip = rng.rand(n) < 0.05
         y[flip] = rng.randint(0, n_classes, size=flip.sum())
         return X, y
@@ -75,7 +73,7 @@ def _is_real_available(name: str, root: str = "./data") -> bool:
     name = name.upper()
     if name == "MNIST":
         return os.path.exists(os.path.join(root, "MNIST", "raw", "train-images-idx3-ubyte"))
-    if name == "FASHION-MNIST  # fixed loader transforms":
+    if name == "FASHION-MNIST":
         return os.path.exists(os.path.join(root, "FashionMNIST", "raw", "train-images-idx3-ubyte"))
     if name == "CIFAR-10":
         return os.path.exists(os.path.join(root, "cifar-10-batches-py", "data_batch_1"))
@@ -87,24 +85,20 @@ def get_dataset(name: str = "MNIST", root: str = "./data"):
     name = name.upper()
     if name == "SYNTHETIC":
         return _synthetic_dataset(seed=0)
-
     if _is_real_available(name, root):
         print(f"REAL {name} cached at {root}, loading...")
     else:
         print(f"REAL {name} not cached, attempting download to {root}...")
-
     result = _try_torchvision(name, root)
     if result is not None:
         (Xtr, ytr), (Xte, yte) = result
         print(f"Loaded REAL {name} via torchvision: train {Xtr.shape}, test {Xte.shape}")
         return (Xtr, ytr), (Xte, yte)
-
     if name == "MNIST":
         result = _try_sklearn_mnist()
         if result is not None:
             print(f"Loaded REAL MNIST via sklearn: train {result[0][0].shape}")
             return result
-
     print(f"Using HARD Synthetic for {name} (real not available offline)")
     n_classes = 10
     input_dim = 784 if name != "CIFAR-10" else 3072
@@ -120,15 +114,7 @@ def get_dataset_info(name: str) -> str:
     }
     return info.get(name.upper(), "Unknown dataset")
 
-# support dirichlet sampling
 def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed: int = 0):
-    """
-    Dirichlet partition: alpha -> heterogeneity
-      alpha=0.1  very non-IID (each client ~1-2 labels)
-      alpha=0.5  moderate (default)
-      alpha=10   IID-like (balanced)
-    Returns: list of (X_k, y_k) per client
-    """
     import os, pickle
     cache = f"/tmp/partitions_alpha{alpha}.pkl"
     if os.path.exists(cache):
@@ -174,7 +160,6 @@ if __name__ == "__main__":
     parts = partition_non_iid(Xtr, ytr, n_clients=5, alpha=0.5)
     for i, (Xk, yk) in enumerate(parts):
         print(f"Client {i}: {Xk.shape} labels {np.bincount(yk, minlength=10)}")
-
 cifar_mean = [0.4914,0.4822,0.4465]
 cifar_std = [0.2023,0.1994,0.2010]
 def flip_labels(y, n_classes=10):
