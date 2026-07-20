@@ -16,7 +16,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         import torch
         mapping = {
             "MNIST": torchvision.datasets.MNIST,
-            "FASHION-MNIST  # fixed loader transforms": torchvision.datasets.FashionMNIST,
+            "FASHION-MNIST": torchvision.datasets.FashionMNIST,
             "CIFAR-10": torchvision.datasets.CIFAR10,
         }
         cls = mapping.get(dataset_name.upper())
@@ -27,7 +27,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         def to_numpy(ds):
             X = ds.data.numpy() if hasattr(ds.data, "numpy") else np.array(ds.data)
             y = ds.targets.numpy() if hasattr(ds.targets, "numpy") else np.array(ds.targets)
-            X = X.astype(np.float32) / 255.0  # per-channel norm for cifar will be applied in next commit
+            X = X.astype(np.float32) / 255.0
             if X.ndim == 3:  # (N,28,28)
                 X = X.reshape(X.shape[0], -1)
             elif X.ndim == 4:
@@ -136,44 +136,32 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
         except: pass
     rng = np.random.RandomState(seed)
     n_classes = len(np.unique(y_train))
-    # Dirichlet per class
     idx_by_class = [np.where(y_train == c)[0] for c in range(n_classes)]
-    # shuffle per class
     for idx in idx_by_class:
         rng.shuffle(idx)
-
-    # sample proportions per client per class
-    proportions = rng.dirichlet([alpha]*n_clients, size=n_classes)  # (n_classes, n_clients)
-    # how many per class per client
+    proportions = rng.dirichlet([alpha]*n_clients, size=n_classes)
     client_indices = [[] for _ in range(n_clients)]
     for c in range(n_classes):
-        # split class c's indices according to proportions[c]
         n_c = len(idx_by_class[c])
-        # convert proportions to counts
         counts = (proportions[c] * n_c).astype(int)
-        # fix rounding
         counts[-1] = n_c - counts[:-1].sum()
         start = 0
         for k in range(n_clients):
             end = start + counts[k]
             client_indices[k].extend(idx_by_class[c][start:end])
             start = end
-    # shuffle and slice arrays
     partitions = []
     for k in range(n_clients):
         idx = np.array(client_indices[k])
         rng.shuffle(idx)
         partitions.append((X_train[idx], y_train[idx]))
-    # skip partition if cache matches alpha
     import os
     if os.path.exists(f"/tmp/partitions_alpha{alpha}.pkl"):
-        pass  # will load cached
-    # cache partitions to disk
+        pass
     try:
         import pickle, os
         pickle.dump(partitions, open(f"/tmp/partitions_alpha{alpha}.pkl","wb"))
     except: pass
-    # disk caching for partitions
     try:
         import pickle
         open("/tmp/partitions_cache.pkl","wb").write(pickle.dumps(partitions))
@@ -187,24 +175,13 @@ if __name__ == "__main__":
     for i, (Xk, yk) in enumerate(parts):
         print(f"Client {i}: {Xk.shape} labels {np.bincount(yk, minlength=10)}")
 
-# cifar transform pipeline: per-channel mean/std
 cifar_mean = [0.4914,0.4822,0.4465]
 cifar_std = [0.2023,0.1994,0.2010]
-
-# option to corrupt labels for malicious
 def flip_labels(y, n_classes=10):
     import numpy as np
-    return (n_classes-1 - y)  # simple flip
-
-# per-channel mean/std for cifar dataset - verified
-cifar_per_channel = True  # per channel normalization for cifar10
-
-# cifar proper normalization
+    return (n_classes-1 - y)
+cifar_per_channel = True
 def cifar_normalize(x): return (x - 0.5)/0.2
-
 def pathological_split(X,y,n_clients):
-    # two class per client
     return [ (X[y%2==i%2], y[y%2==i%2]) for i in range(n_clients)]
-
-# label flipping attack for malicious subset
 def malicious_flip(y): return 9-y
