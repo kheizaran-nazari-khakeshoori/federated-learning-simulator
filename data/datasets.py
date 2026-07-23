@@ -9,17 +9,28 @@ Partitioning: Dirichlet non-IID (alpha controls heterogeneity)
 import os  # used for _ensure_data_dir
 import numpy as np
 
+def _normalize_name(name: str) -> str:
+    """Normalize dataset name - handle dashes, underscores, case."""
+    n = name.upper().strip().replace("_", "-")
+    # handle common variants
+    if n in ("FASHION-MNIST", "FASHION_MNIST", "FASHION"):
+        return "FASHION-MNIST"
+    if n in ("CIFAR10", "CIFAR-10"):
+        return "CIFAR-10"
+    return n
+
 def _try_torchvision(dataset_name: str, root: str = "./data"):
     """Try torchvision auto-download to ./data. Returns numpy (X,y) or None."""
     try:
         import torchvision
         import torch
+        norm = _normalize_name(dataset_name)
         mapping = {
             "MNIST": torchvision.datasets.MNIST,
             "FASHION-MNIST": torchvision.datasets.FashionMNIST,
             "CIFAR-10": torchvision.datasets.CIFAR10,
         }
-        cls = mapping.get(dataset_name.upper())
+        cls = mapping.get(norm)
         if cls is None:
             return None
         train = cls(root=root, train=True, download=True)
@@ -70,7 +81,7 @@ def _ensure_data_dir(root: str = "./data"):
 
 def _is_real_available(name: str, root: str = "./data") -> bool:
     """Check if torchvision already downloaded real dataset to disk."""
-    name = name.upper()
+    name = _normalize_name(name)
     if name == "MNIST":
         return os.path.exists(os.path.join(root, "MNIST", "raw", "train-images-idx3-ubyte"))
     if name == "FASHION-MNIST":
@@ -82,37 +93,41 @@ def _is_real_available(name: str, root: str = "./data") -> bool:
 def get_dataset(name: str = "MNIST", root: str = "./data"):
     """Prefer real MNIST, log cached vs downloading."""
     _ensure_data_dir(root)
-    name = name.upper()
-    if name == "SYNTHETIC":
+    norm = _normalize_name(name)
+    if norm == "SYNTHETIC":
         return _synthetic_dataset(seed=0)
-    if _is_real_available(name, root):
-        print(f"REAL {name} cached at {root}, loading...")
+    if _is_real_available(norm, root):
+        print(f"REAL {norm} cached at {root}, loading...")
     else:
-        print(f"REAL {name} not cached, attempting download to {root}...")
-    result = _try_torchvision(name, root)
+        print(f"REAL {norm} not cached, attempting download to {root}...")
+    result = _try_torchvision(norm, root)
     if result is not None:
         (Xtr, ytr), (Xte, yte) = result
-        print(f"Loaded REAL {name} via torchvision: train {Xtr.shape}, test {Xte.shape}")
+        print(f"Loaded REAL {norm} via torchvision: train {Xtr.shape}, test {Xte.shape}")
         return (Xtr, ytr), (Xte, yte)
-    if name == "MNIST":
+    if norm == "MNIST":
         result = _try_sklearn_mnist()
         if result is not None:
             print(f"Loaded REAL MNIST via sklearn: train {result[0][0].shape}")
             return result
-    print(f"Using HARD Synthetic for {name} (real not available offline)")
+    print(f"Using HARD Synthetic for {norm} (real not available offline)")
     n_classes = 10
-    input_dim = 784 if name != "CIFAR-10" else 3072
-    return _synthetic_dataset(n_train=6000, n_test=1000, n_classes=n_classes, input_dim=input_dim, seed=hash(name) % 1000)
+    input_dim = 784 if norm != "CIFAR-10" else 3072
+    # use stable hash for seed
+    import hashlib
+    seed = int(hashlib.md5(norm.encode()).hexdigest(), 16) % 1000
+    return _synthetic_dataset(n_train=6000, n_test=1000, n_classes=n_classes, input_dim=input_dim, seed=seed)
 
 def get_dataset_info(name: str) -> str:
     """Return short description for GUI tooltip."""
+    norm = _normalize_name(name)
     info = {
         "MNIST": "MNIST 70k 28x28 grayscale digits (10 classes)",
         "FASHION-MNIST": "Fashion-MNIST 70k 28x28 fashion items",
         "CIFAR-10": "CIFAR-10 60k 32x32 color images",
         "SYNTHETIC": "Synthetic hard Gaussians (offline, 5% label noise)",
     }
-    return info.get(name.upper(), "Unknown dataset")
+    return info.get(norm, "Unknown dataset")
 
 def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed: int = 0):
     import os, pickle
