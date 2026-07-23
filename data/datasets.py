@@ -12,7 +12,6 @@ import numpy as np
 def _normalize_name(name: str) -> str:
     """Normalize dataset name - handle dashes, underscores, case."""
     n = name.upper().strip().replace("_", "-")
-    # handle common variants
     if n in ("FASHION-MNIST", "FASHION_MNIST", "FASHION"):
         return "FASHION-MNIST"
     if n in ("CIFAR10", "CIFAR-10"):
@@ -36,8 +35,32 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         train = cls(root=root, train=True, download=True)
         test = cls(root=root, train=False, download=True)
         def to_numpy(ds):
-            X = ds.data.numpy() if hasattr(ds.data, "numpy") else np.array(ds.data)
-            y = ds.targets.numpy() if hasattr(ds.targets, "numpy") else np.array(ds.targets)
+            # handle both old and new torchvision API (PIL vs tensor)
+            try:
+                if hasattr(ds, 'data'):
+                    X = ds.data
+                    if hasattr(X, 'numpy'):
+                        X = X.numpy()
+                    else:
+                        X = np.array(X)
+                else:
+                    # new API - stack images
+                    X = np.array([np.array(img) for img, _ in ds])
+            except Exception:
+                X = np.array(ds.data) if hasattr(ds, 'data') else np.array([np.array(x) for x,_ in ds])
+            try:
+                if hasattr(ds, 'targets'):
+                    y = ds.targets
+                    if hasattr(y, 'numpy'):
+                        y = y.numpy()
+                    else:
+                        y = np.array(y)
+                elif hasattr(ds, 'labels'):
+                    y = np.array(ds.labels)
+                else:
+                    y = np.array([label for _, label in ds])
+            except Exception:
+                y = np.array(ds.targets) if hasattr(ds, 'targets') else np.array(ds.labels) if hasattr(ds, 'labels') else np.zeros(len(X), dtype=np.int64)
             X = X.astype(np.float32) / 255.0
             if X.ndim == 3:
                 X = X.reshape(X.shape[0], -1)
@@ -113,7 +136,6 @@ def get_dataset(name: str = "MNIST", root: str = "./data"):
     print(f"Using HARD Synthetic for {norm} (real not available offline)")
     n_classes = 10
     input_dim = 784 if norm != "CIFAR-10" else 3072
-    # use stable hash for seed
     import hashlib
     seed = int(hashlib.md5(norm.encode()).hexdigest(), 16) % 1000
     return _synthetic_dataset(n_train=6000, n_test=1000, n_classes=n_classes, input_dim=input_dim, seed=seed)
