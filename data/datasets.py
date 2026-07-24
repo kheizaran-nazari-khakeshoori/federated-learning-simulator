@@ -154,11 +154,13 @@ def get_dataset_info(name: str) -> str:
     return info.get(norm, "Unknown dataset")
 
 def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed: int = 0):
-    import os, pickle
-    cache = f"/tmp/partitions_alpha{alpha}.pkl"
-    if os.path.exists(cache):
-        try: return pickle.load(open(cache,"rb"))
-        except: pass
+    """
+    Dirichlet partition: alpha -> heterogeneity
+      alpha=0.1  very non-IID (each client ~1-2 labels)
+      alpha=0.5  moderate (default)
+      alpha=10   IID-like (balanced)
+    Returns: list of (X_k, y_k) per client
+    """
     rng = np.random.RandomState(seed)
     n_classes = len(np.unique(y_train))
     idx_by_class = [np.where(y_train == c)[0] for c in range(n_classes)]
@@ -180,17 +182,6 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
         idx = np.array(client_indices[k])
         rng.shuffle(idx)
         partitions.append((X_train[idx], y_train[idx]))
-    import os
-    if os.path.exists(f"/tmp/partitions_alpha{alpha}.pkl"):
-        pass
-    try:
-        import pickle, os
-        pickle.dump(partitions, open(f"/tmp/partitions_alpha{alpha}.pkl","wb"))
-    except: pass
-    try:
-        import pickle
-        open("/tmp/partitions_cache.pkl","wb").write(pickle.dumps(partitions))
-    except: pass
     return partitions
 
 if __name__ == "__main__":
