@@ -71,7 +71,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
                 X = X.reshape(X.shape[0], -1)
             return X, y
         return to_numpy(train), to_numpy(test)
-    except Exception as e:
+    except Exception:
         return None
 
 def _try_sklearn_mnist():
@@ -161,6 +161,10 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
       alpha=10   IID-like (balanced)
     Returns: list of (X_k, y_k) per client
     """
+    if n_clients < 1:
+        raise ValueError("n_clients must be >=1")
+    if alpha <= 0:
+        raise ValueError("alpha must be >0")
     rng = np.random.RandomState(seed)
     n_classes = len(np.unique(y_train))
     idx_by_class = [np.where(y_train == c)[0] for c in range(n_classes)]
