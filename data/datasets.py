@@ -8,6 +8,7 @@ Partitioning: Dirichlet non-IID (alpha controls heterogeneity)
 """
 import os  # used for _ensure_data_dir
 import numpy as np
+import hashlib
 
 def _normalize_name(name: str) -> str:
     """Normalize dataset name - handle dashes, underscores, case."""
@@ -17,6 +18,10 @@ def _normalize_name(name: str) -> str:
     if n in ("CIFAR10", "CIFAR-10"):
         return "CIFAR-10"
     return n
+
+def _stable_seed(name: str) -> int:
+    """Deterministic seed from name - not using hash() which is randomized."""
+    return int(hashlib.md5(name.encode()).hexdigest(), 16) % 1000
 
 def _try_torchvision(dataset_name: str, root: str = "./data"):
     """Try torchvision auto-download to ./data. Returns numpy (X,y) or None."""
@@ -35,7 +40,6 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         train = cls(root=root, train=True, download=True)
         test = cls(root=root, train=False, download=True)
         def to_numpy(ds):
-            # handle both old and new torchvision API (PIL vs tensor)
             try:
                 if hasattr(ds, 'data'):
                     X = ds.data
@@ -44,7 +48,6 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
                     else:
                         X = np.array(X)
                 else:
-                    # new API - stack images
                     X = np.array([np.array(img) for img, _ in ds])
             except Exception:
                 X = np.array(ds.data) if hasattr(ds, 'data') else np.array([np.array(x) for x,_ in ds])
@@ -136,8 +139,7 @@ def get_dataset(name: str = "MNIST", root: str = "./data"):
     print(f"Using HARD Synthetic for {norm} (real not available offline)")
     n_classes = 10
     input_dim = 784 if norm != "CIFAR-10" else 3072
-    import hashlib
-    seed = int(hashlib.md5(norm.encode()).hexdigest(), 16) % 1000
+    seed = _stable_seed(norm)
     return _synthetic_dataset(n_train=6000, n_test=1000, n_classes=n_classes, input_dim=input_dim, seed=seed)
 
 def get_dataset_info(name: str) -> str:
