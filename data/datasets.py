@@ -6,9 +6,9 @@ Real datasets for Federated Learning simulator.
 
 Partitioning: Dirichlet non-IID (alpha controls heterogeneity)
 """
-import os  # used for _ensure_data_dir
-import numpy as np
+import os
 import hashlib
+import numpy as np
 
 def _normalize_name(name: str) -> str:
     """Normalize dataset name - handle dashes, underscores, case."""
@@ -27,7 +27,6 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
     """Try torchvision auto-download to ./data. Returns numpy (X,y) or None."""
     try:
         import torchvision
-        import torch
         norm = _normalize_name(dataset_name)
         mapping = {
             "MNIST": torchvision.datasets.MNIST,
@@ -43,10 +42,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
             try:
                 if hasattr(ds, 'data'):
                     X = ds.data
-                    if hasattr(X, 'numpy'):
-                        X = X.numpy()
-                    else:
-                        X = np.array(X)
+                    X = X.numpy() if hasattr(X, 'numpy') else np.array(X)
                 else:
                     X = np.array([np.array(img) for img, _ in ds])
             except Exception:
@@ -54,10 +50,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
             try:
                 if hasattr(ds, 'targets'):
                     y = ds.targets
-                    if hasattr(y, 'numpy'):
-                        y = y.numpy()
-                    else:
-                        y = np.array(y)
+                    y = y.numpy() if hasattr(y, 'numpy') else np.array(y)
                 elif hasattr(ds, 'labels'):
                     y = np.array(ds.labels)
                 else:
