@@ -39,7 +39,6 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         train = cls(root=root, train=True, download=True)
         test = cls(root=root, train=False, download=True)
         def to_numpy(ds):
-            # compatibility for torchvision 0.19 PIL vs tensor
             try:
                 if hasattr(ds, 'data'):
                     X = ds.data
@@ -93,7 +92,9 @@ def _synthetic_dataset(n_train=6000, n_test=1000, n_classes=10, input_dim=784, s
         flip = rng.rand(n) < 0.05
         y[flip] = rng.randint(0, n_classes, size=flip.sum())
         return X, y
-    return make_split(n_train), make_split(n_test)
+    train = make_split(n_train)
+    test = make_split(n_test)
+    return train, test
 
 def _ensure_data_dir(root: str = "./data"):
     """Ensure ./data exists before download (creates if missing)."""
