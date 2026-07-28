@@ -24,7 +24,7 @@ def _stable_seed(name: str) -> int:
     return int(hashlib.md5(name.encode()).hexdigest(), 16) % 1000
 
 def _try_torchvision(dataset_name: str, root: str = "./data"):
-    """Try torchvision auto-download to ./data. Returns numpy (X,y) or None."""
+    """Try torchvision auto-download to ./data. Returns ((Xtr,ytr),(Xte,yte)) or None."""
     try:
         import torchvision
         norm = _normalize_name(dataset_name)
@@ -39,6 +39,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         train = cls(root=root, train=True, download=True)
         test = cls(root=root, train=False, download=True)
         def to_numpy(ds):
+            # compatibility for torchvision 0.19 PIL vs tensor
             try:
                 if hasattr(ds, 'data'):
                     X = ds.data
@@ -68,6 +69,7 @@ def _try_torchvision(dataset_name: str, root: str = "./data"):
         return None
 
 def _try_sklearn_mnist():
+    """Try sklearn fetch_openml as fallback for MNIST."""
     try:
         from sklearn.datasets import fetch_openml
         print("Fetching MNIST via sklearn openml...")
@@ -79,7 +81,7 @@ def _try_sklearn_mnist():
         return None
 
 def _synthetic_dataset(n_train=6000, n_test=1000, n_classes=10, input_dim=784, seed=0):
-    """Hard synthetic: closer centroids + higher noise + 5% label noise (no more 100% accuracy)."""
+    """Hard synthetic: closer centroids + higher noise + 5% label noise."""
     rng = np.random.RandomState(seed)
     centroids = rng.randn(n_classes, input_dim) * 1.0
     def make_split(n):
@@ -110,7 +112,7 @@ def _is_real_available(name: str, root: str = "./data") -> bool:
     return False
 
 def get_dataset(name: str = "MNIST", root: str = "./data"):
-    """Prefer real MNIST, log cached vs downloading."""
+    """Load dataset: try torchvision -> sklearn -> synthetic fallback."""
     _ensure_data_dir(root)
     norm = _normalize_name(name)
     if norm == "SYNTHETIC":
