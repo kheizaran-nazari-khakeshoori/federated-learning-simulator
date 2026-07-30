@@ -9,6 +9,7 @@ Partitioning: Dirichlet non-IID (alpha controls heterogeneity)
 import os
 import hashlib
 import numpy as np
+from typing import Tuple, List
 
 def _normalize_name(name: str) -> str:
     """Normalize dataset name - handle dashes, underscores, case."""
@@ -80,7 +81,7 @@ def _try_sklearn_mnist():
         return None
 
 def _synthetic_dataset(n_train=6000, n_test=1000, n_classes=10, input_dim=784, seed=0):
-    """Hard synthetic: closer centroids + higher noise + 5% label noise."""
+    """Hard synthetic: closer centroids + higher noise + 5% label noise (deterministic via seed)."""
     rng = np.random.RandomState(seed)
     centroids = rng.randn(n_classes, input_dim) * 1.0
     def make_split(n):
