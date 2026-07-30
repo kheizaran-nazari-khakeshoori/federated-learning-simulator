@@ -172,6 +172,13 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
     for c in range(n_classes):
         n_c = len(idx_by_class[c])
         counts = (proportions[c] * n_c).astype(int)
+        # handle highly skewed alpha where counts sum may be off
+        if counts.sum() < n_c:
+            # distribute remainder to largest proportions
+            remainder = n_c - counts.sum()
+            # add to last client that had zero if needed
+            for i in range(remainder):
+                counts[i % n_clients] += 1
         counts[-1] = n_c - counts[:-1].sum()
         start = 0
         for k in range(n_clients):
