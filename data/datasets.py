@@ -181,7 +181,6 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
     for k in range(n_clients):
         idx = np.array(client_indices[k])
         rng.shuffle(idx)
-        # ensure each client gets at least one sample if possible
         partitions.append((X_train[idx], y_train[idx]))
     return partitions
 
@@ -191,6 +190,7 @@ if __name__ == "__main__":
     parts = partition_non_iid(Xtr, ytr, n_clients=5, alpha=0.5)
     for i, (Xk, yk) in enumerate(parts):
         print(f"Client {i}: {Xk.shape} labels {np.bincount(yk, minlength=10)}")
+# per-channel stats for CIFAR
 cifar_mean = [0.4914,0.4822,0.4465]
 cifar_std = [0.2023,0.1994,0.2010]
 def flip_labels(y, n_classes=10):
