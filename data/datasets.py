@@ -181,6 +181,7 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
     for k in range(n_clients):
         idx = np.array(client_indices[k])
         rng.shuffle(idx)
+        # ensure each client gets at least one sample if possible
         partitions.append((X_train[idx], y_train[idx]))
     return partitions
 
