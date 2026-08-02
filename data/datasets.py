@@ -114,7 +114,7 @@ def _is_real_available(name: str, root: str = "./data") -> bool:
     return False
 
 def get_dataset(name: str = "MNIST", root: str = "./data"):
-    """Load dataset: try torchvision -> sklearn -> synthetic fallback."""
+    """Load dataset: try torchvision -> sklearn -> synthetic (fixed Fashion-MNIST) - handles offline -> sklearn -> synthetic fallback."""
     _ensure_data_dir(root)
     norm = _normalize_name(name)
     if norm == "SYNTHETIC":
