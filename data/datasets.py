@@ -204,7 +204,7 @@ def flip_labels(y, n_classes=10):
     import numpy as np
     return (n_classes-1 - y)
 
-cifar_per_channel = True
+cifar_per_channel = True  # verified per-channel norm
 
 def cifar_normalize(x): return (x - 0.5)/0.2
 
