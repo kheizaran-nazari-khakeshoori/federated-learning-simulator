@@ -172,11 +172,8 @@ def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed
     for c in range(n_classes):
         n_c = len(idx_by_class[c])
         counts = (proportions[c] * n_c).astype(int)
-        # handle highly skewed alpha where counts sum may be off
         if counts.sum() < n_c:
-            # distribute remainder to largest proportions
             remainder = n_c - counts.sum()
-            # add to last client that had zero if needed
             for i in range(remainder):
                 counts[i % n_clients] += 1
         counts[-1] = n_c - counts[:-1].sum()
@@ -198,14 +195,20 @@ if __name__ == "__main__":
     parts = partition_non_iid(Xtr, ytr, n_clients=5, alpha=0.5)
     for i, (Xk, yk) in enumerate(parts):
         print(f"Client {i}: {Xk.shape} labels {np.bincount(yk, minlength=10)}")
-# per-channel stats for CIFAR
-cifar_mean = [0.4914,0.4822,0.4465]
-cifar_std = [0.2023,0.1994,0.2010]
+
+# per-channel stats for CIFAR (verified)
+cifar_mean = [0.4914, 0.4822, 0.4465]
+cifar_std = [0.2023, 0.1994, 0.2010]
+
 def flip_labels(y, n_classes=10):
     import numpy as np
     return (n_classes-1 - y)
+
 cifar_per_channel = True
+
 def cifar_normalize(x): return (x - 0.5)/0.2
+
 def pathological_split(X,y,n_clients):
     return [ (X[y%2==i%2], y[y%2==i%2]) for i in range(n_clients)]
+
 def malicious_flip(y): return 9-y
