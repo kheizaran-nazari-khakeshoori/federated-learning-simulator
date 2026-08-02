@@ -212,3 +212,4 @@ def pathological_split(X,y,n_clients):
     return [ (X[y%2==i%2], y[y%2==i%2]) for i in range(n_clients)]
 
 def malicious_flip(y): return 9-y
+
