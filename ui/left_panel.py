@@ -155,4 +155,4 @@ def _set_inputs_state(panel, state):
         try: child.config(state=state)
         except: pass
 
-# mu slider already
+# mu slider wired - now returned via mu_var
