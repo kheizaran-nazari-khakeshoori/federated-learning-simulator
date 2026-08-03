@@ -135,6 +135,7 @@ def create_left_panel(root):
         "epochs_var": epochs_var,
         "dataset_var": dataset_var,
         "agg_var": agg_var,
+        "mu_var": mu_var,
         "alpha_var": alpha_var,
         "lr_var": lr_var,
         "client_frac_var": client_frac_var,
