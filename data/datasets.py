@@ -152,53 +152,38 @@ def get_dataset_info(name: str) -> str:
 
 def partition_non_iid(X_train, y_train, n_clients: int, alpha: float = 0.5, seed: int = 0):
     """
-    Dirichlet partition: alpha -> heterogeneity
-      alpha=0.1  very non-IID (each client ~1-2 labels)
-      alpha=0.5  moderate (default)
-      alpha=10   IID-like (balanced)
-    Returns: list of (X_k, y_k) per client
+    Dirichlet non-IID partition.
+    Smaller alpha produces more heterogeneous client distributions.
     """
     if n_clients < 1:
         raise ValueError("n_clients must be >=1")
     if alpha <= 0:
         raise ValueError("alpha must be >0")
+
     rng = np.random.RandomState(seed)
-    n_classes = len(np.unique(y_train))
-    idx_by_class = [np.where(y_train == c)[0] for c in range(n_classes)]
-    for idx in idx_by_class:
-        rng.shuffle(idx)
-    proportions = rng.dirichlet([alpha]*n_clients, size=n_classes)
+    classes = np.unique(y_train)
     client_indices = [[] for _ in range(n_clients)]
-    for c in range(n_classes):
-        n_c = len(idx_by_class[c])
-        counts = (proportions[c] * n_c).astype(int)
-        if counts.sum() < n_c:
-            remainder = n_c - counts.sum()
-            for i in range(remainder):
-                counts[i % n_clients] += 1
-        counts[-1] = n_c - counts[:-1].sum()
+
+    for label in classes:
+        class_indices = np.where(y_train == label)[0]
+        rng.shuffle(class_indices)
+
+        proportions = rng.dirichlet([alpha] * n_clients)
+        counts = rng.multinomial(len(class_indices), proportions)
+
         start = 0
-        for k in range(n_clients):
-            end = start + counts[k]
-            client_indices[k].extend(idx_by_class[c][start:end])
+        for client_id, count in enumerate(counts):
+            end = start + count
+            client_indices[client_id].extend(class_indices[start:end])
             start = end
+
     partitions = []
-    for k in range(n_clients):
-        idx = np.array(client_indices[k])
-        rng.shuffle(idx)
-        partitions.append((X_train[idx], y_train[idx]))
+    for indices in client_indices:
+        indices = np.asarray(indices, dtype=int)
+        rng.shuffle(indices)
+        partitions.append((X_train[indices], y_train[indices]))
+
     return partitions
-
-if __name__ == "__main__":
-    (Xtr, ytr), (Xte, yte) = get_dataset("MNIST")
-    print("MNIST", Xtr.shape, ytr.shape, Xte.shape)
-    parts = partition_non_iid(Xtr, ytr, n_clients=5, alpha=0.5)
-    for i, (Xk, yk) in enumerate(parts):
-        print(f"Client {i}: {Xk.shape} labels {np.bincount(yk, minlength=10)}")
-
-# per-channel stats for CIFAR (verified)
-cifar_mean = [0.4914, 0.4822, 0.4465]
-cifar_std = [0.2023, 0.1994, 0.2010]
 
 def flip_labels(y, n_classes=10):
     import numpy as np
