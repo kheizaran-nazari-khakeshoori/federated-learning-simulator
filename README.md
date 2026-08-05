@@ -3,9 +3,10 @@
 
 ***Portfolio Project*** *— Demonstrates Federated Learning, Non-IID Data Partitioning, Model Aggregation Strategies, and Real-time Simulation Engineering with Python + Tkinter + PyTorch.*
 
-![](assets/Screencast%20From%202026-09-08%2016-29-02.gif)
-![](assets/Screencast%20From%202026-09-08%2016-29-02.gif)
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANklEQVR4nO3OMQ2AABAAsSNBCkJfFSqwwIgHRiywEZJWQZeZ2ao9AAD+4lyruzq+ngAA8Nr1AOH8BeZxN/IIAAAAAElFTkSuQmCC)
+<p align="center">
+  <img src="assets/demo.gif" alt="Federated Learning Simulator Demo" width="85%">
+</p>
+<p align="center"><em>Live training run — 5 clients, Dirichlet α=0.5, FedAvg, with real-time accuracy chart, per-client progress, and round-by-round logs.</em></p>
 
 **Table of Contents**
 - [System Demonstration](#anchor-1)
@@ -24,8 +25,6 @@
 - [Testing & Verification](#anchor-14)
 - [Future Improvements](#anchor-15)
 - [Author](#anchor-16)
-
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANElEQVR4nO3OUQmAABBAsSeIWMICprwEpjSIFfwTYUuwZWaO6goAAAAABJRU5ErkJggg==)
 
 <a id="anchor-1"></a>
 **System Demonstration**
@@ -58,7 +57,7 @@
 ```
 
 **Agent / System Execution Demo**
-*![Demo](assets/Screencast%20From%202026-09-08%2016-29-02.gif)* *— Live training run with 5 clients, Dirichlet alpha=0.5, FedAvg, showing per-client progress, global accuracy chart, and round-by-round logs.*
+*Live training run — see demo at top of page (or `assets/demo.gif`).*
 
 **Example Output**
 ```
@@ -85,7 +84,7 @@
 **Built With**
 Python • Tkinter • NumPy • PyTorch • torchvision • FastAPI • Hydra • Docker • pytest
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVR4nO3OMQ2AABAAsSNhwgJOUPcjIpnRgQU2QtIq6DIze3UGAMBfnGt1V8fXEwAAXrse/xcF7U7sx4wAAAAASUVORK5CYII=)
+---
 
 <a id="anchor-2"></a>
 **Why This Project Matters**
@@ -102,14 +101,14 @@ This project showcases concepts relevant to modern AI engineering:
 - Real-time training orchestration and visualization
 - Modular ML systems design (UI ↔ Engine ↔ Algorithm ↔ Model ↔ Data)
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANklEQVR4nO3OQQmAABRAsSeYxZw/lieLGMACBrCCNxG2BFtmZquOAAD4i3Ot7mr/egIAwGvXA6fGBdgoVMwYAAAAAElFTkSuQmCC)
+---
 
 <a id="anchor-3"></a>
 **Overview**
 
 The Federated Learning Simulator is a desktop application that lets you configure and run federated training locally without any server setup. It handles the full loop: downloading/loading datasets, partitioning them non-IID across clients, running local SGD per client, aggregating via FedAvg/FedProx/FedAdam, and visualizing global accuracy in real time. Built with a clean separation between UI (`ui/`), orchestration (`core/engine.py`), algorithms (`algorithms/`), models (`models/cnn.py`), and data (`data/datasets.py`), it works both as an interactive GUI and as a headless benchmark harness.
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVR4nO3OMQ2AABAAsSPBCUZfE2IYmVDBhAU2QtIq6DIzW7UHAMBfnGt1V8fXEwAAXrse/xcF7U7sx4wAAAAASUVORK5CYII=)
+---
 
 <a id="anchor-4"></a>
 **Problem Statement**
@@ -125,7 +124,7 @@ Traditional approaches often suffer from:
 
 These limitations make FL hard to teach, debug, and tune — especially under non-IID conditions where vanilla averaging diverges and proximal/adaptive methods become essential.
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVR4nO3OYQ1AABSAwY9JoICqL4Z8Ikiggn9mu0twy8wc1twy8wc1RkAAH9xbdVa7V9PAAB47X4A9CgEJQFjJ/EAAAAASUVORK5CYII=)
+---
 
 <a id="anchor-5"></a>
 **Solution Approach**
@@ -159,10 +158,15 @@ Dataset and partitioning.
 
 ***Note:*** *Detailed data flow is documented once in [Architecture](#anchor-9) to avoid duplication.*
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVR4nO3OMQ2AABAAsSNhZscYahheJwqQgQU2QtIq6DIze3UGAMBfnGt1V8fXEwAAXrseoqcEQXyAWBgAAAAASUVORK5CYII=)
+---
 
 <a id="anchor-6"></a>
 **Demo**
+
+<p align="center">
+  <img src="assets/demo.gif" alt="Demo — Federated Learning Simulator in action" width="85%">
+</p>
+<p align="center"><em>5 clients · Dirichlet α=0.5 · FedAvg · 10 rounds — real SimpleCNN training with live chart, client bars, and log streaming.</em></p>
 
 **Running the Application**
 ```bash
@@ -217,7 +221,7 @@ Environment: Python 3.10+, `numpy==2.5.3`, `torch==2.4.0` (optional), `torchvisi
 **Example Output**
 See [System Demonstration](#anchor-1) for full log. Final artifacts: `global_weights.npy` (aggregated weights), live chart export via “Export PNG”, and `federated_logs.txt` via “Save” in log header.
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANklEQVR4nO3OQQmAABRAsSfYxZo/khWsYQLPJrCCNxG2BFtmZquOAAD4i3Ot7mr/egIAwGvXA4qjBdKlX6OKAAAAAElFTkSuQmCC)
+---
 
 <a id="anchor-7"></a>
 **Features**
@@ -231,7 +235,7 @@ See [System Demonstration](#anchor-1) for full log. Final artifacts: `global_wei
 - Dual execution modes: GUI (`app.py`), headless engine (`core/engine.py`), FastAPI (`api/server.py`), Docker + docker-compose
 - Presets (Fast/Accurate), label histogram visualization, log export, chart export, weight saving
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANElEQVR4nO3OQQmAABRAsad4EEtY9QcxnUms4E2ELcGWmTmrKwAA/uLeqrU6vp4AAPDa/gDzXgM37EF77AAAAABJRU5ErkJggg==)
+---
 
 <a id="anchor-8"></a>
 **Results & Metrics**
@@ -255,7 +259,7 @@ Real datasets via `torchvision` with automatic fallback to `sklearn` / synthetic
 
 **Interpretation:** Heterogeneity hurts — accuracy drops ~19 points from IID (75%) to highly non-IID (55.9%) under FedAvg. FedProx trades speed for stability (proximal penalty reduces drift), while FedAdam accelerates early rounds via adaptive server updates. Use Fast preset (3 clients, 5 rounds) for demos at 30fps; Accurate preset (5 clients, 20 rounds) for final numbers.
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANElEQVR4nO3OQQmAABRAsSd4NIGhrOTvaQBrWMICprwEpjSIFfwTYUuwZWaO6goAAAAABJRU5ErkJggg==)
+---
 
 <a id="anchor-9"></a>
 **Architecture**
@@ -346,7 +350,7 @@ The app is intentionally modular: `app.py` is a thin wrapper that wires `ui/left
 - Dirichlet partitioning with pickle caching (`/tmp/partitions_alpha*.pkl`) for fast re-runs
 - Graceful degradation: real datasets → synthetic, TorchCNN → SimpleCNN, GUI → headless
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVR4nO3OQQmAABRAsSd4NIGhrOTvaQBrWMICprwEpjSIFfwTYUuwZWaO6goAAAAABJRU5ErkJggg==)
+---
 
 <a id="anchor-10"></a>
 **Engineering Decisions**
@@ -395,7 +399,7 @@ The GUI is for intuition; benchmarking and deployment need headless interfaces. 
 - FastAPI enables future extension to real distributed FL without rewriting the core
 </details>
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAM0lEQVR4nO3KsQ0AIRAEsUW6Qij1KvnevhMSYmKQ7GiCGd09k3wBAOAVf+2O1024x768x24AwE1qAdYuAy151mgcAAAAAElFTkSuQmCC)
+---
 
 <a id="anchor-11"></a>
 **Challenges & Lessons Learned**
@@ -449,7 +453,7 @@ Through this project I strengthened my understanding of:
 - GUI/ML separation — keeping the engine headless-testable while the UI remains a thin view
 - Dirichlet non-IID simulation and its impact on convergence — the single most important parameter for FL realism
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANElEQVR4nO3OQQmAABRAsad4EEtY9QcxnUms4E2ELcGWmTmrKwAA/uLeqrU6vp4AAPDa/gDzXgM37EF77AAAAABJRU5ErkJggg==)
+---
 
 <a id="anchor-12"></a>
 **Repository Structure**
@@ -482,7 +486,8 @@ Through this project I strengthened my understanding of:
 ├── conf/
 │   └── config.yaml         # hydra defaults
 ├── assets/
-│   └── Screencast From 2026-09-08 16-29-02.gif  # demo recording
+│   ├── demo.gif  # demo recording (optimized copy)
+│   └── Screencast From 2026-09-08 16-29-02.gif  # original recording
 ├── tests/
 │   ├── test_algorithms.py  # FedAvg/Prox/Adam aggregation
 │   ├── test_models.py      # SimpleCNN training
@@ -495,7 +500,7 @@ Through this project I strengthened my understanding of:
 └── README.md
 ```
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVR4nO3OMQ2AABAAsSNhZscZXlheJwqQgQU2QtIq6DIze3UGAMBfnGt1V8fXEwAAXrseop8EQrmJduIAAAAASUVORK5CYII=)
+---
 
 <a id="anchor-13"></a>
 **Getting Started**
@@ -545,7 +550,7 @@ docker build -t fl-sim . && docker run -e DISPLAY=$DISPLAY fl-sim
 docker-compose up       # via compose
 ```
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVR4nO3OMQ2AABAAsSNhwgJSMPcjIpnRgQU2QtIq6DIze3UGAMBfnGt1V8fXEwAAXrseck4EMD8ueP8AAAAASUVORK5CYII=)
+---
 
 <a id="anchor-14"></a>
 **Testing & Verification**
@@ -581,7 +586,7 @@ uvicorn api.server:app --reload && curl http://localhost:8000/metrics
 - `benchmark_outputs/alpha_sweep.csv` reproduces 55.9% (alpha 0.1) → 75% (alpha 10) gap
 - GUI shows live accuracy increase, client bars fill per round, logs stream without freezing
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVR4nO3OMQ2AABAAsSPBCUZfEZJgwgQTFtgISaugy8xs1R4AAH9xrNVdnV0R4AAH9xbdVa7V9PAAB47XoACMQF83OOLCAAAAAASUVORK5CYII=)
+---
 
 <a id="anchor-15"></a>
 **Future Improvements**
@@ -592,7 +597,7 @@ uvicorn api.server:app --reload && curl http://localhost:8000/metrics
 - Add Flower-based truly distributed mode (`core/flower_client.py`/`flower_server.py` already scaffolded) for multi-machine runs
 - Expand evaluation: per-class accuracy, confusion matrix rendering, and WandB integration (`wandb_var` toggle) for experiment tracking
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAM0lEQVR4nO3OUQmAABBAsaeI2MKqV8RyJrGCfyJsCbbMzFldAQDwF/dWrdXx9QQAgNf2B/NkAzRb7P0YAAAAAElFTkSuQmCC)
+---
 
 <a id="anchor-16"></a>
 **Author**
@@ -604,9 +609,6 @@ uvicorn api.server:app --reload && curl http://localhost:8000/metrics
 **LinkedIn:** [www.linkedin.com/in/kheizaran-nazari-khakeshoori](http://www.linkedin.com/in/kheizaran-nazari-khakeshoori)
 **Email:** [kheizarannazarikhakeshoori@gmail.com](mailto:kheizarannazarikhakeshoori@gmail.com)
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVR4nO3OQQ2AQBAAsSHhiQI0IWp9ngBsYIEfIWkVdJuZs5oAAPiLe6+O6vp4AgDAa+sBhYwEOqBD7p8AAAAASUVORK5CYII=)
-
 **Disclaimer**
 This project is intended for educational and research purposes only. Licensed under the **MIT License**.
 
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnEAAAACCAYAAAA3pIp+AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANklEQVR4nO3OQQmAABRAsScYxpg/h5VMYARvRrCCNxG2BFtmZquOAAD4i3Ot7mr/egIAwGvXA224BcUMk6pDAAAAAElFTkSuQmCC)
