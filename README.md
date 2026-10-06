@@ -1,6 +1,11 @@
-# Federated Learning Simulator  
-*Interactive desktop simulator for federated training on non-IID data with real CNN optimization and federated aggregation.*
+# Federated Learning Simulator — Non-IID Aggregation Study
 
+> Research prototype for distributed optimization & privacy-preserving ML.
+> Question: how do FedAvg / FedProx / FedAdam behave under Dirichlet non-IID partitioning vs communication cost?
+
+**Method:** Python + PyTorch + Tkinter desktop simulator; Dirichlet-α partitioning, loss vs communication visualizations; 27 PyTest aggregation tests.
+**Reproduce:** `pip install -r requirements.txt` then `python app.py`
+**Author:** Kheizaran Nazari Khakeshoori — ORCID: https://orcid.org/0009-0000-2931-4503
 ***Portfolio Project*** *— Demonstrates Federated Learning, Non-IID Data Partitioning, Model Aggregation Strategies, and Real-time Simulation Engineering with Python + Tkinter + PyTorch.*
 
 <p align="center">
